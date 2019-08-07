@@ -153,9 +153,6 @@ namespace riscv {
 
 			/* step the processor */
 			while (P::instret != inststop) {
-				if (P::pc == P::breakpoint && P::breakpoint != 0) {
-					return exit_cause_cli;
-				}
 				inst = P::mmu.inst_fetch(*this, P::pc, pc_offset);
 				inst_cache_key = inst % inst_cache_size;
 				if (inst_cache[inst_cache_key].inst == inst) {
@@ -173,6 +170,9 @@ namespace riscv {
 					P::instret++;
 				} else {
 					P::raise(rv_cause_illegal_instruction, P::pc);
+				}
+				if (P::pc == P::breakpoint && P::breakpoint != 0) {
+					return exit_cause_cli;
 				}
 			}
 			return exit_cause_continue;

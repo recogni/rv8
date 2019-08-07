@@ -216,7 +216,7 @@ struct rv_emulator
 		}
 	}
 
-	/* Start the execuatable with the given proxy processor template */
+	/* Start the executable with the given proxy processor template */
 	template <typename P>
 	void start_proxy()
 	{
@@ -245,6 +245,48 @@ struct rv_emulator
 		proc.destroy();
 	}
 
+#ifdef RECOGNI    
+	/* Start the executable with the given proxy processor template */
+	template <typename P>
+	void setup_proxy(P proc)
+	{
+		/* setup floating point exception mask */
+		fenv_init();
+
+		/* instantiate processor and set log options */
+		proc.log = proc_logs;
+		proc.mmu.mem->log = (proc.log & proc_log_memory);
+		proc.stats_dirname = stats_dirname;
+		if (symbolicate) proc.symlookup = [&](addr_t va) { return proc.symlookup_elf(va); };
+
+		/* randomise integer register state with 512 bits of entropy */
+		proc.seed_registers(cpu, initial_seed, 512);
+
+		/* Map ELF executable and setup the stack */
+		proc.map_executable(elf_filename, host_cmdline, symbolicate);
+		proc.map_proxy_stack(P::mmu_type::memory_top, P::mmu_type::stack_size);
+		proc.setup_proxy_stack(cpu, host_cmdline, host_env,
+			P::mmu_type::memory_top, P::mmu_type::stack_size);
+
+		/* Initialize the processor */
+		proc.init();
+	}
+
+	/* Kill the executable with the given proxy processor template */
+	template <typename P>
+	void run_proxy(P proc)
+	{
+		proc.run(exit_cause_continue);
+	}
+    
+	/* Finish the executable with the given proxy processor template */
+	template <typename P>
+	void fini_proxy(P proc)
+	{
+		proc.destroy();
+	}
+#endif		
+
 	/* Start a specific processor implementation based on ELF type */
 	void exec()
 	{
@@ -269,9 +311,48 @@ struct rv_emulator
 			default: panic("illegal elf class");
 		}
 	}
+#ifdef RECOGNI
+    	/* Load and start a specific processor implementation based on ELF type */
+	void load()
+	{
+		elf_file elf;
+		elf.load(elf_filename, elf_load_exec);
+
+		/* check for RDTSCP on X86 */
+		#if X86_USE_RDTSCP
+		if (cpu.caps.size() > 0 && cpu.caps.find("RDTSCP") == cpu.caps.end()) {
+			panic("error: x86 host without RDTSCP. Recompile with -DX86_NO_RDTSCP");
+		}
+		#endif
+	}
+#endif
 };
 
+#ifdef RECOGNI
 
+proxy_emulator_rv32imafdc proc;
+rv_emulator emulator;
+
+int emulation_setup(int argc, const char* argv[], const char* envp[])
+{
+	emulator.parse_commandline(argc, argv, envp);
+	emulator.load();
+	emulator.setup_proxy<proxy_emulator_rv32imafdc>(proc);
+	return 0;
+}
+
+int emulation_run(size_t count)
+{
+    exit_cause ec;
+    ec = proc.step(count);
+    return (ec != exit_cause_cli);
+}
+
+void emulation_fini()
+{
+    emulator.fini_proxy(proc);
+}
+#else		    
 /* program main */
 
 int main(int argc, const char* argv[], const char* envp[])
@@ -281,3 +362,4 @@ int main(int argc, const char* argv[], const char* envp[])
 	emulator.exec();
 	return 0;
 }
+#endif

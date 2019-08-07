@@ -31,14 +31,14 @@ AR :=           $(shell which ar)
 
 # compiler function tests
 check_cxx_opt = $(shell T=$$(mktemp /tmp/test.XXXX); \
-                echo 'int main() { return 0; }' > $$T.$(2) ; \
-                $(1) $(3) $$T.$(2) -o /dev/null >/dev/null 2>&1 ; \
-                echo $$?; rm $$T $$T.$(2))
+								echo 'int main() { return 0; }' > $$T.$(2) ; \
+								$(1) $(3) $$T.$(2) -o /dev/null >/dev/null 2>&1 ; \
+								echo $$?; rm $$T $$T.$(2))
 check_ld_opt =  $(shell T=$$(mktemp /tmp/test.XXXX); \
-                echo 'int main() { return 0; }' > $$T.$(2) ; \
-                $(1) -c $$T.$(2) -o $$T.o  >/dev/null 2>&1 ; \
-                $(1) $(3) $$T.o -o /dev/null >/dev/null 2>&1 ; \
-                echo $$?; rm $$T $$T.$(2) $$T.o)
+								echo 'int main() { return 0; }' > $$T.$(2) ; \
+								$(1) -c $$T.$(2) -o $$T.o  >/dev/null 2>&1 ; \
+								$(1) $(3) $$T.o -o /dev/null >/dev/null 2>&1 ; \
+								echo $$?; rm $$T $$T.$(2) $$T.o)
 
 # compiler flag test definitions
 LIBCPP_FLAGS =  -stdlib=libc++
@@ -53,26 +53,27 @@ NOEXEC_FLAGS =  -Wl,-z,noexecstack
 TOP_DIR =       $(shell pwd)
 ASMJIT_SRC_DIR = third_party/asmjit/src
 INCLUDES :=     -I$(TOP_DIR)/src/abi \
-                -I$(TOP_DIR)/src/asm \
-                -I$(TOP_DIR)/src/elf \
-                -I$(TOP_DIR)/src/emu \
-                -I$(TOP_DIR)/src/gen \
-                -I$(TOP_DIR)/src/hash \
-                -I$(TOP_DIR)/src/jit \
-                -I$(TOP_DIR)/src/meta \
-                -I$(TOP_DIR)/src/mem \
-                -I$(TOP_DIR)/src/model \
-                -I$(TOP_DIR)/src/rom \
-                -I$(TOP_DIR)/src/util \
-                -I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit
+								-I$(TOP_DIR)/src/asm \
+								-I$(TOP_DIR)/src/elf \
+								-I$(TOP_DIR)/src/emu \
+								-I$(TOP_DIR)/src/gen \
+								-I$(TOP_DIR)/src/hash \
+								-I$(TOP_DIR)/src/jit \
+								-I$(TOP_DIR)/src/meta \
+								-I$(TOP_DIR)/src/mem \
+								-I$(TOP_DIR)/src/model \
+								-I$(TOP_DIR)/src/rom \
+								-I$(TOP_DIR)/src/util \
+								-I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit
 OPT_FLAGS =     -O3 -fwrapv
 DEBUG_FLAGS =   -g
 WARN_FLAGS =    -Wall -Wsign-compare -Wno-deprecated-declarations -Wno-strict-aliasing
 CPPFLAGS =
-CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
+CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -D RECOGNI
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
 CXXFLAGS =      -std=c++1y -fno-rtti -fno-exceptions $(CFLAGS)
-LDFLAGS =       
+LDLIBFLAGS =     -r -Wl,-s
+LDFLAGS =
 ASM_FLAGS =     -S -masm=intel
 MACOS_LDFLAGS = -Wl,-pagezero_size,0x1000 -Wl,-no_pie -image_base 0x7ffe00000000
 LINUX_LDFLAGS = -pie -Wl,-Ttext-segment=0x7ffe00000000
@@ -183,67 +184,67 @@ cc_src_deps =   $(subst $(SRC_DIR),$(DEP_DIR),$(subst .c,.c.P,$(1)))
 
 # riscv meta data
 RV_META_DATA =  $(META_DIR)/codecs \
-                $(META_DIR)/compression \
-                $(META_DIR)/constraints \
-                $(META_DIR)/csrs \
-                $(META_DIR)/enums \
-                $(META_DIR)/extensions \
-                $(META_DIR)/formats \
-                $(META_DIR)/opcodes \
-                $(META_DIR)/opcode-descriptions \
-                $(META_DIR)/opcode-fullnames \
-                $(META_DIR)/opcode-pseudocode-alt \
-                $(META_DIR)/opcode-pseudocode-c \
-                $(META_DIR)/operands \
-                $(META_DIR)/registers \
-                $(META_DIR)/types
+								$(META_DIR)/compression \
+								$(META_DIR)/constraints \
+								$(META_DIR)/csrs \
+								$(META_DIR)/enums \
+								$(META_DIR)/extensions \
+								$(META_DIR)/formats \
+								$(META_DIR)/opcodes \
+								$(META_DIR)/opcode-descriptions \
+								$(META_DIR)/opcode-fullnames \
+								$(META_DIR)/opcode-pseudocode-alt \
+								$(META_DIR)/opcode-pseudocode-c \
+								$(META_DIR)/operands \
+								$(META_DIR)/registers \
+								$(META_DIR)/types
 
 # libriscv_util
 RV_UTIL_SRCS =  $(SRC_DIR)/util/base64.cc \
-                $(SRC_DIR)/util/bigint.cc \
-                $(SRC_DIR)/util/cmdline.cc \
-                $(SRC_DIR)/util/color.cc \
-                $(SRC_DIR)/util/dtoa.cc \
-                $(SRC_DIR)/util/hdtoa.cc \
-                $(SRC_DIR)/util/itoa.cc \
-                $(SRC_DIR)/util/fmt.cc \
-                $(SRC_DIR)/util/host.cc \
-                $(SRC_DIR)/util/sha512.cc \
-                $(SRC_DIR)/util/util.cc
+								$(SRC_DIR)/util/bigint.cc \
+								$(SRC_DIR)/util/cmdline.cc \
+								$(SRC_DIR)/util/color.cc \
+								$(SRC_DIR)/util/dtoa.cc \
+								$(SRC_DIR)/util/hdtoa.cc \
+								$(SRC_DIR)/util/itoa.cc \
+								$(SRC_DIR)/util/fmt.cc \
+								$(SRC_DIR)/util/host.cc \
+								$(SRC_DIR)/util/sha512.cc \
+								$(SRC_DIR)/util/util.cc
 RV_UTIL_OBJS =  $(call cxx_src_objs, $(RV_UTIL_SRCS))
 RV_UTIL_LIB =   $(LIB_DIR)/libriscv_util.a
 
 # libasmjit_x86
 ASMJIT_SRCS =   $(ASMJIT_SRC_DIR)/asmjit/base/arch.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/assembler.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/codebuilder.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/codecompiler.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/codeemitter.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/codeholder.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/constpool.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/cpuinfo.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/func.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/globals.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/inst.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/logging.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/operand.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/osutils.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/regalloc.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/runtime.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/string.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/utils.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/vmem.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/base/zone.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86assembler.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86builder.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86compiler.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86inst.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86instimpl.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86internal.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86logging.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86operand.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86operand_regs.cpp \
-                $(ASMJIT_SRC_DIR)/asmjit/x86/x86regalloc.cpp
+								$(ASMJIT_SRC_DIR)/asmjit/base/assembler.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/codebuilder.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/codecompiler.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/codeemitter.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/codeholder.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/constpool.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/cpuinfo.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/func.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/globals.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/inst.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/logging.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/operand.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/osutils.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/regalloc.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/runtime.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/string.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/utils.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/vmem.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/base/zone.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86assembler.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86builder.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86compiler.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86inst.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86instimpl.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86internal.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86logging.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86operand.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86operand_regs.cpp \
+								$(ASMJIT_SRC_DIR)/asmjit/x86/x86regalloc.cpp
 ASMJIT_OBJS =   $(call asmjit_src_objs, $(ASMJIT_SRCS))
 ASMJIT_LIB =    $(LIB_DIR)/libasmjit_x86.a
 
@@ -256,26 +257,26 @@ RV_MODEL_LIB =  $(LIB_DIR)/libriscv_model.a
 # libriscv_gen
 RV_GEN_HDR =    $(SRC_DIR)/gen/gen.h
 RV_GEN_SRCS =   $(SRC_DIR)/gen/gen-cc.cc \
-                $(SRC_DIR)/gen/gen-constraints.cc \
-                $(SRC_DIR)/gen/gen-fpu-test.cc \
-                $(SRC_DIR)/gen/gen-interp.cc \
-                $(SRC_DIR)/gen/gen-jit.cc \
-                $(SRC_DIR)/gen/gen-latex.cc \
-                $(SRC_DIR)/gen/gen-latex-alt.cc \
-                $(SRC_DIR)/gen/gen-map.cc \
-                $(SRC_DIR)/gen/gen-markdown.cc \
-                $(SRC_DIR)/gen/gen-meta.cc \
-                $(SRC_DIR)/gen/gen-operands.cc \
-                $(SRC_DIR)/gen/gen-strings.cc \
-                $(SRC_DIR)/gen/gen-switch.cc \
-                $(SRC_DIR)/gen/gen-tablegen.cc
+								$(SRC_DIR)/gen/gen-constraints.cc \
+								$(SRC_DIR)/gen/gen-fpu-test.cc \
+								$(SRC_DIR)/gen/gen-interp.cc \
+								$(SRC_DIR)/gen/gen-jit.cc \
+								$(SRC_DIR)/gen/gen-latex.cc \
+								$(SRC_DIR)/gen/gen-latex-alt.cc \
+								$(SRC_DIR)/gen/gen-map.cc \
+								$(SRC_DIR)/gen/gen-markdown.cc \
+								$(SRC_DIR)/gen/gen-meta.cc \
+								$(SRC_DIR)/gen/gen-operands.cc \
+								$(SRC_DIR)/gen/gen-strings.cc \
+								$(SRC_DIR)/gen/gen-switch.cc \
+								$(SRC_DIR)/gen/gen-tablegen.cc
 RV_GEN_OBJS =   $(call cxx_src_objs, $(RV_GEN_SRCS))
 RV_GEN_LIB =    $(LIB_DIR)/libriscv_gen.a
 
 # libriscv_elf
 RV_ELF_SRCS =   $(SRC_DIR)/elf/elf.cc \
-                $(SRC_DIR)/elf/elf-file.cc \
-                $(SRC_DIR)/elf/elf-format.cc
+								$(SRC_DIR)/elf/elf-file.cc \
+								$(SRC_DIR)/elf/elf-format.cc
 RV_ELF_OBJS =   $(call cxx_src_objs, $(RV_ELF_SRCS))
 RV_ELF_LIB =    $(LIB_DIR)/libriscv_elf.a
 
@@ -297,11 +298,11 @@ TEST_CC_ASM =   $(ASM_DIR)/test-cc.s
 
 # libriscv_asm
 RV_ASM_SRCS =   $(SRC_DIR)/asm/assembler.cc \
-                $(SRC_DIR)/asm/disasm.cc \
-                $(SRC_DIR)/asm/format.cc \
-                $(SRC_DIR)/asm/jit.cc \
-                $(SRC_DIR)/asm/meta.cc \
-                $(SRC_DIR)/asm/strings.cc
+								$(SRC_DIR)/asm/disasm.cc \
+								$(SRC_DIR)/asm/format.cc \
+								$(SRC_DIR)/asm/jit.cc \
+								$(SRC_DIR)/asm/meta.cc \
+								$(SRC_DIR)/asm/strings.cc
 RV_ASM_OBJS =   $(call cxx_src_objs, $(RV_ASM_SRCS))
 RV_ASM_LIB =    $(LIB_DIR)/libriscv_asm.a
 
@@ -312,9 +313,9 @@ RV_META_BIN =   $(BIN_DIR)/rv-meta
 
 # rv-bin
 RV_BIN_SRCS = $(SRC_DIR)/app/rv-dump.cc \
-              $(SRC_DIR)/app/rv-histogram.cc \
-              $(SRC_DIR)/app/rv-pte.cc \
-              $(SRC_DIR)/app/rv-bin.cc
+							$(SRC_DIR)/app/rv-histogram.cc \
+							$(SRC_DIR)/app/rv-pte.cc \
+							$(SRC_DIR)/app/rv-bin.cc
 RV_BIN_OBJS = $(call cxx_src_objs, $(RV_BIN_SRCS))
 RV_BIN_BIN =  $(BIN_DIR)/rv-bin
 
@@ -327,6 +328,7 @@ RV_JIT_BIN =  $(BIN_DIR)/rv-jit
 RV_SIM_SRCS = $(SRC_DIR)/app/rv-sim.cc
 RV_SIM_OBJS = $(call cxx_src_objs, $(RV_SIM_SRCS))
 RV_SIM_BIN =  $(BIN_DIR)/rv-sim
+RV_SIM_LIB =   $(LIB_DIR)/libriscv_sim.a
 
 # rv-sys
 RV_SYS_SRCS = $(SRC_DIR)/app/rv-sys.cc
@@ -404,49 +406,50 @@ MMAP_MACOS_LIB =    $(LIB_DIR)/mmap-macos.dylib
 
 # source and binaries
 ALL_CXX_SRCS = $(RV_ASM_SRCS) \
-           $(RV_ELF_SRCS) \
-           $(RV_GEN_SRCS) \
-           $(RV_META_SRC) \
-           $(RV_MODEL_SRC) \
-           $(RV_STR_SRC) \
-           $(RV_UTIL_SRCS) \
-           $(RV_BIN_SRCS) \
-           $(RV_JIT_SRCS) \
-           $(RV_META_SRCS) \
-           $(RV_SIM_SRCS) \
-           $(RV_SYS_SRCS) \
-           $(TEST_BITS_SRCS) \
-           $(TEST_ENCODER_SRCS) \
-           $(TEST_ENDIAN_SRCS) \
-           $(TEST_JIT_SRCS) \
-           $(TEST_MMAP_SRCS) \
-           $(TEST_MMU_SRCS) \
-           $(TEST_MUL_SRCS) \
-           $(TEST_OPERATORS_SRCS) \
-           $(TEST_PRINTF_SRCS) \
-           $(TEST_RAND_SRCS)
+					 $(RV_ELF_SRCS) \
+					 $(RV_GEN_SRCS) \
+					 $(RV_META_SRC) \
+					 $(RV_MODEL_SRC) \
+					 $(RV_STR_SRC) \
+					 $(RV_UTIL_SRCS) \
+					 $(RV_BIN_SRCS) \
+					 $(RV_JIT_SRCS) \
+					 $(RV_META_SRCS) \
+					 $(RV_SIM_SRCS) \
+					 $(RV_SYS_SRCS) \
+					 $(TEST_BITS_SRCS) \
+					 $(TEST_ENCODER_SRCS) \
+					 $(TEST_ENDIAN_SRCS) \
+					 $(TEST_JIT_SRCS) \
+					 $(TEST_MMAP_SRCS) \
+					 $(TEST_MMU_SRCS) \
+					 $(TEST_MUL_SRCS) \
+					 $(TEST_OPERATORS_SRCS) \
+					 $(TEST_PRINTF_SRCS) \
+					 $(TEST_RAND_SRCS)
 
 BINARIES = $(RV_META_BIN) \
-           $(RV_BIN_BIN) \
-           $(RV_JIT_BIN) \
-           $(RV_SIM_BIN) \
-           $(RV_SYS_BIN) \
-           $(TEST_BITS_BIN) \
-           $(TEST_ENCODER_BIN) \
-           $(TEST_ENDIAN_BIN) \
-           $(TEST_JIT_BIN) \
-           $(TEST_MMAP_BIN) \
-           $(TEST_MMU_BIN) \
-           $(TEST_MUL_BIN) \
-           $(TEST_OPERATORS_BIN) \
-           $(TEST_PRINTF_BIN) \
-           $(TEST_RAND_BIN)
+					 $(RV_BIN_BIN) \
+					 $(RV_JIT_BIN) \
+					 $(RV_SIM_BIN) \
+					 $(RV_SYS_BIN) \
+					 $(TEST_BITS_BIN) \
+					 $(TEST_ENCODER_BIN) \
+					 $(TEST_ENDIAN_BIN) \
+					 $(TEST_JIT_BIN) \
+					 $(TEST_MMAP_BIN) \
+					 $(TEST_MMU_BIN) \
+					 $(TEST_MUL_BIN) \
+					 $(TEST_OPERATORS_BIN) \
+					 $(TEST_PRINTF_BIN) \
+					 $(TEST_RAND_BIN)
 
 ASSEMBLY = $(TEST_CC_ASM)
 
 # build rules
 
-all: meta $(BINARIES) $(ASSEMBLY)
+#all: meta $(BINARIES) $(ASSEMBLY)
+all: $(RV_SIM_LIB)
 clean: ; @echo "CLEAN $(BUILD_DIR)"; rm -rf $(BUILD_DIR)
 backup: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar -czf $${dir}-backup-$$(date '+%Y%m%d').tar.gz $${dir}
 dist: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar --exclude .git -czf $${dir}-$$(date '+%Y%m%d').tar.gz $${dir}
@@ -535,8 +538,8 @@ install:
 # make is run as the timestamps are not updated unless the output differs.
 
 parse_meta =  $(shell T=$$(mktemp /tmp/test.XXXX); \
-               $(RV_META_BIN) $(1) -r $(META_DIR) > $$T; \
-               diff $$T $(2) > /dev/null || mv $$T $(2) ; rm -f $$T)
+							 $(RV_META_BIN) $(1) -r $(META_DIR) > $$T; \
+							 diff $$T $(2) > /dev/null || mv $$T $(2) ; rm -f $$T)
 
 meta: $(RV_OPANDS_HDR) $(RV_CODEC_HDR) $(RV_JIT_HDR) $(RV_JIT_SRC) \
 	$(RV_META_HDR) $(RV_META_SRC) $(RV_STR_HDR) $(RV_STR_SRC) \
@@ -613,11 +616,13 @@ $(RV_UTIL_LIB): $(RV_UTIL_OBJS)
 ifeq ($(ARCH),darwin_x86_64)
 MMAP_LIB = $(MMAP_MACOS_LIB)
 MMAP_FLAGS = -rpath $(DEST_DIR)/lib
+MMAP_OBJS = $(MMAP_MACOS_OBJS)
 endif
 
 ifeq ($(ARCH),linux_x86_64)
 MMAP_LIB = $(MMAP_LINUX_LIB)
 MMAP_FLAGS = -Wl,-rpath,$(DEST_DIR)/lib
+MMAP_OBJS = $(MMAP_LINUX_OBJS)
 endif
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
@@ -631,6 +636,14 @@ $(MMAP_MACOS_LIB): $(MMAP_MACOS_OBJS)
 $(MMAP_LINUX_LIB): $(MMAP_LINUX_OBJS)
 	@mkdir -p $(@D) ;
 	$(call cmd, SOLIB $@, $(CC) $(MMAP_LINUX_LDFLAGS) -o $@ $^ -ldl)
+
+
+
+$(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
+	@mkdir -p $(@D) ;
+	$(call cmd, SIMLIB $@, $(CXX) $(LDLIBFLAGS) -o $@ $^)
+
+
 
 # binary targets
 
