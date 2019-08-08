@@ -362,7 +362,9 @@ void emulation_fini()
 {
     emulator.fini_proxy(proc);
 }
+
 #else
+
 /* program main */
 
 int main(int argc, const char* argv[], const char* envp[])
@@ -372,4 +374,5 @@ int main(int argc, const char* argv[], const char* envp[])
 	emulator.exec();
 	return 0;
 }
+
 #endif

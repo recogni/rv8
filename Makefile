@@ -448,8 +448,8 @@ ASSEMBLY = $(TEST_CC_ASM)
 
 # build rules
 
-#all: meta $(BINARIES) $(ASSEMBLY)
-all: meta $(RV_ASM_OBJS)
+all: meta $(BINARIES) $(ASSEMBLY)
+# all: meta $(RV_ASM_OBJS)
 clean: ; @echo "CLEAN $(BUILD_DIR)"; rm -rf $(BUILD_DIR)
 backup: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar -czf $${dir}-backup-$$(date '+%Y%m%d').tar.gz $${dir}
 dist: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar --exclude .git -czf $${dir}-$$(date '+%Y%m%d').tar.gz $${dir}
@@ -545,7 +545,6 @@ meta: $(RV_OPANDS_HDR) $(RV_CODEC_HDR) $(RV_JIT_HDR) $(RV_JIT_SRC) \
 	$(RV_META_HDR) $(RV_META_SRC) $(RV_STR_HDR) $(RV_STR_SRC) \
 	$(RV_FPU_HDR) $(RV_FPU_GEN) $(RV_INTERP_HDR) $(RV_CONSTR_HDR) \
 	$(TEST_CC_SRC)
-	@echo "I worked"
 
 $(RV_OPANDS_HDR): $(RV_META_BIN) $(RV_META_DATA)
 	$(call cmd, META $@, $(call parse_meta,-A,$@))
@@ -656,7 +655,7 @@ $(RV_JIT_BIN): $(RV_JIT_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(ASMJI
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
-$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_LIB)
+$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_OBJS)
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
