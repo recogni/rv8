@@ -46,6 +46,10 @@
 #include <sys/utsname.h>
 #include <sys/resource.h>
 
+#ifdef RECOGNI
+#include "rv8.h"
+#endif
+
 #include "host-endian.h"
 #include "types.h"
 #include "fmt.h"
@@ -187,7 +191,6 @@ struct rv_emulator
 				[&](std::string s) { return (help_or_error = true); } },
 			{ nullptr, nullptr, cmdline_arg_type_none,   nullptr, nullptr }
 		};
-
 		auto result = cmdline_option::process_options(options, argc, argv);
 		if (!result.second) {
 			help_or_error = true;
@@ -245,7 +248,7 @@ struct rv_emulator
 		proc.destroy();
 	}
 
-#ifdef RECOGNI    
+#ifdef RECOGNI
 	/* Start the executable with the given proxy processor template */
 	template <typename P>
 	void setup_proxy(P proc)
@@ -278,14 +281,14 @@ struct rv_emulator
 	{
 		proc.run(exit_cause_continue);
 	}
-    
+
 	/* Finish the executable with the given proxy processor template */
 	template <typename P>
 	void fini_proxy(P proc)
 	{
 		proc.destroy();
 	}
-#endif		
+#endif
 
 	/* Start a specific processor implementation based on ELF type */
 	void exec()
@@ -348,11 +351,18 @@ int emulation_run(size_t count)
     return (ec != exit_cause_cli);
 }
 
+char *emulation_debug(char *debug_cmd)
+{
+    std::shared_ptr<debug_cli<proxy_emulator_rv32imafdc>> cli;
+    cli->one_shot(&proc, debug_cmd);
+    return NULL;
+}
+
 void emulation_fini()
 {
     emulator.fini_proxy(proc);
 }
-#else		    
+#else
 /* program main */
 
 int main(int argc, const char* argv[], const char* envp[])

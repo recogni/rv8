@@ -306,6 +306,33 @@ namespace riscv {
 			exit(1);
 		}
 
+	    int one_shot(P *proc, char *buf) {
+		    cmd_state st{ proc, this };
+		    auto line = ltrim(rtrim(buf));
+		    auto args = split(line, " ", false, false);
+		    if (args.size() == 0) return 0;
+		    auto it = map.find(args[0]);
+		    if (it == map.end()) {
+			printf("unknown command %s\n", args[0].c_str());
+			return 0;
+		    }
+		    auto &def = it->second;
+		    if (args.size() < def.min_args || args.size() > def.max_args) {
+			if (def.min_args == def.max_args) {
+			    printf("%s takes %zu argument%s\n",
+				   args[0].c_str(), def.min_args,
+				   def.min_args> 1 ? "s" : "");
+			} else {
+			    printf("%s takes at least %zu argument%s\n",
+				   args[0].c_str(), def.min_args,
+				   def.min_args> 1 ? "s" : "");
+			}
+			return 0;
+		    }
+		    return (def.fn(st, args) != 0);
+		}
+		
+
 		/* CLI main loop */
 
 		char* getline(P *proc)
