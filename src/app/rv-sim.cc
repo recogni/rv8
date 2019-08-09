@@ -249,9 +249,10 @@ struct rv_emulator
 	}
 
 #ifdef RECOGNI
+
 	/* Start the executable with the given proxy processor template */
 	template <typename P>
-	void setup_proxy(P proc)
+	void setup_proxy(P& proc)
 	{
 		/* setup floating point exception mask */
 		fenv_init();
@@ -277,18 +278,19 @@ struct rv_emulator
 
 	/* Kill the executable with the given proxy processor template */
 	template <typename P>
-	void run_proxy(P proc)
+	void run_proxy(P& proc)
 	{
 		proc.run(exit_cause_continue);
 	}
 
 	/* Finish the executable with the given proxy processor template */
 	template <typename P>
-	void fini_proxy(P proc)
+	void fini_proxy(P& proc)
 	{
 		proc.destroy();
 	}
-#endif
+
+#endif  // RECOGNI
 
 	/* Start a specific processor implementation based on ELF type */
 	void exec()
@@ -314,8 +316,10 @@ struct rv_emulator
 			default: panic("illegal elf class");
 		}
 	}
+
 #ifdef RECOGNI
-    	/* Load and start a specific processor implementation based on ELF type */
+
+	/* Load and start a specific processor implementation based on ELF type */
 	void load()
 	{
 		elf_file elf;
@@ -328,7 +332,9 @@ struct rv_emulator
 		}
 		#endif
 	}
-#endif
+
+#endif  // RECOGNI
+
 };
 
 #ifdef RECOGNI
@@ -363,7 +369,7 @@ void emulation_fini()
     emulator.fini_proxy(proc);
 }
 
-#else
+#else  // !RECOGNI
 
 /* program main */
 
@@ -375,4 +381,4 @@ int main(int argc, const char* argv[], const char* envp[])
 	return 0;
 }
 
-#endif
+#endif  // RECOGNI
