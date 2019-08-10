@@ -64,14 +64,17 @@ INCLUDES :=     -I$(TOP_DIR)/src/abi \
 				-I$(TOP_DIR)/src/model \
 				-I$(TOP_DIR)/src/rom \
 				-I$(TOP_DIR)/src/util \
-				-I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit
+				-I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit \
+				-I$(TOP_DIR)/cpp-httplib
+
 OPT_FLAGS =     -O3 -fwrapv
 DEBUG_FLAGS =   -g
 WARN_FLAGS =    -Wall -Wsign-compare -Wno-deprecated-declarations -Wno-strict-aliasing
 CPPFLAGS =
-CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -D RECOGNI
+# CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -DRECOGNI
+CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
-CXXFLAGS =      -std=c++1y -fno-rtti -fno-exceptions $(CFLAGS)
+CXXFLAGS =      -std=c++1y -fno-rtti $(CFLAGS)
 LDLIBFLAGS =     -r -Wl,-s
 LDFLAGS =
 ASM_FLAGS =     -S -masm=intel
@@ -625,6 +628,8 @@ MMAP_LIB = $(MMAP_LINUX_LIB)
 MMAP_FLAGS = -Wl,-rpath,$(DEST_DIR)/lib
 MMAP_OBJS = $(MMAP_LINUX_OBJS)
 endif
+
+sim-lib: $(RV_SIM_LIB)
 
 $(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS) $(RV_ASM_OBJS)
 	$(call cmd, SIMLIB $@, $(CXX) $(LDLIBFLAGS) -o $@ $^)

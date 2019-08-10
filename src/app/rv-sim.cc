@@ -129,6 +129,7 @@ struct rv_emulator
 
 	host_cpu &cpu;
 	int proc_logs = 0;
+	bool server_enable = false;
 	bool help_or_error = false;
 	bool symbolicate = false;
 	uint64_t initial_seed = 0;
@@ -180,6 +181,9 @@ struct rv_emulator
 			{ "-d", "--debug", cmdline_arg_type_none,
 				"Start up in debugger CLI",
 				[&](std::string s) { return (proc_logs |= proc_log_ebreak_cli); } },
+			{ "-t", "--server", cmdline_arg_type_none,
+				"Enable HTTP server - use /step, /step/<n>, and /finish",
+				[&](std::string s) { return (server_enable = true); } },
 			{ "-x", "--no-pseudo", cmdline_arg_type_none,
 				"Disable Pseudoinstruction decoding",
 				[&](std::string s) { return (proc_logs |= proc_log_no_pseudo); } },
@@ -244,12 +248,39 @@ struct rv_emulator
 
 		/* Initialize and run the processor */
 		proc.init();
-		proc.run(proc.log & proc_log_ebreak_cli ? exit_cause_cli : exit_cause_continue);
+		if (server_enable == true)
+			proc.run_server();
+		else
+			proc.run(proc.log & proc_log_ebreak_cli ? exit_cause_cli : exit_cause_continue);
 		proc.destroy();
 	}
 
-#ifdef RECOGNI
+	/* Start a specific processor implementation based on ELF type */
+	void exec()
+	{
+		elf_file elf;
+		elf.load(elf_filename, elf_load_exec);
 
+		/* check for RDTSCP on X86 */
+		#if X86_USE_RDTSCP
+		if (cpu.caps.size() > 0 && cpu.caps.find("RDTSCP") == cpu.caps.end()) {
+			panic("error: x86 host without RDTSCP. Recompile with -DX86_NO_RDTSCP");
+		}
+		#endif
+
+		/* execute */
+		switch (elf.ei_class) {
+			case ELFCLASS32:
+				start_proxy<proxy_emulator_rv32imafdc>(); break;
+				break;
+			case ELFCLASS64:
+				start_proxy<proxy_emulator_rv64imafdc>(); break;
+				break;
+			default: panic("illegal elf class");
+		}
+	}
+
+#ifdef RECOGNI
 	/* Start the executable with the given proxy processor template */
 	template <typename P>
 	void setup_proxy(P& proc)
@@ -287,37 +318,9 @@ struct rv_emulator
 	template <typename P>
 	void fini_proxy(P& proc)
 	{
+		printf("Proxy destroyed!\n");
 		proc.destroy();
 	}
-
-#endif  // RECOGNI
-
-	/* Start a specific processor implementation based on ELF type */
-	void exec()
-	{
-		elf_file elf;
-		elf.load(elf_filename, elf_load_exec);
-
-		/* check for RDTSCP on X86 */
-		#if X86_USE_RDTSCP
-		if (cpu.caps.size() > 0 && cpu.caps.find("RDTSCP") == cpu.caps.end()) {
-			panic("error: x86 host without RDTSCP. Recompile with -DX86_NO_RDTSCP");
-		}
-		#endif
-
-		/* execute */
-		switch (elf.ei_class) {
-			case ELFCLASS32:
-				start_proxy<proxy_emulator_rv32imafdc>(); break;
-				break;
-			case ELFCLASS64:
-				start_proxy<proxy_emulator_rv64imafdc>(); break;
-				break;
-			default: panic("illegal elf class");
-		}
-	}
-
-#ifdef RECOGNI
 
 	/* Load and start a specific processor implementation based on ELF type */
 	void load()
@@ -332,7 +335,6 @@ struct rv_emulator
 		}
 		#endif
 	}
-
 #endif  // RECOGNI
 
 };

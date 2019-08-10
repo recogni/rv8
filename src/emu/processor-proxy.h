@@ -22,7 +22,9 @@ namespace riscv {
 
 		const char* name() { return "rv-sim"; }
 
-		void init() {}
+		void init() {
+			P::ireg[rv_ireg_a0].r.xu.val = 0;
+		}
 
 		void destroy()
 		{

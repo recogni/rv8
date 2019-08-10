@@ -5,6 +5,8 @@
 #ifndef rv_processor_runloop_h
 #define rv_processor_runloop_h
 
+#include "httplib.h"
+
 namespace riscv {
 
 	/* Simple processor stepper with instruction cache */
@@ -24,6 +26,10 @@ namespace riscv {
 
 		std::shared_ptr<debug_cli<P>> cli;
 
+		using Request = httplib::Request;
+		using Response = httplib::Response;
+		httplib::Server server;
+
 		struct rv_inst_cache_ent
 		{
 			inst_t inst;
@@ -41,6 +47,12 @@ namespace riscv {
 				(processor_singleton::current)->signal_dispatch(signum, info);
 		}
 
+		static void signal_handler_sev(int signum, siginfo_t *info, void *)
+		{
+			static_cast<processor_runloop<P>*>
+				(processor_singleton::current)->signal_dispatch(signum, info);
+		}
+
 		void signal_dispatch(int signum, siginfo_t *info)
 		{
 			printf("SIGNAL   :%s pc:0x%0llx si_addr:0x%0llx\n",
@@ -52,6 +64,33 @@ namespace riscv {
 
 		void init()
 		{
+			server.set_keep_alive_max_count(0);
+
+			// Server and route setup.
+			server.Get("/ping", [&](const Request& req, Response& rsp) {
+				rsp.set_content("PONG", "application/text");
+			});
+			server.Get("/step", [&](const Request& req, Response& rsp) {
+				const int ex = step(1);
+				if (ex != exit_cause_continue)
+					rsp.set_content("FINISHED", "application/text");
+				else
+					rsp.set_content("CONTINUE", "application/text");
+			});
+
+			server.Get(R"(/step/(\d+))", [&](const Request& req, Response& rsp) {
+				const uint n = std::stoi(req.matches[1]);
+				const int ex = step(n);
+				if (ex != exit_cause_continue)
+					rsp.set_content("FINISHED", "application/text");
+				else
+					rsp.set_content("CONTINUE", "application/text");
+			});
+
+			server.Get("/finish", [&](const Request& req, Response& rsp) {
+				run();
+			});
+
 			// block signals before so we don't deadlock in signal handlers
 			sigset_t set;
 			sigemptyset(&set);
@@ -72,11 +111,16 @@ namespace riscv {
 			sigprocmask(SIG_BLOCK, &sigpipe_set, nullptr);
 
 			// install signal handler
+			struct sigaction sigaction_handler_sev;
+			memset(&sigaction_handler_sev, 0, sizeof(sigaction_handler_sev));
+			sigaction_handler_sev.sa_sigaction = &processor_runloop<P>::signal_handler_sev;
+			sigaction_handler_sev.sa_flags = SA_SIGINFO;
+			sigaction(SIGSEGV, &sigaction_handler_sev, nullptr);
+
 			struct sigaction sigaction_handler;
 			memset(&sigaction_handler, 0, sizeof(sigaction_handler));
 			sigaction_handler.sa_sigaction = &processor_runloop<P>::signal_handler;
 			sigaction_handler.sa_flags = SA_SIGINFO;
-			sigaction(SIGSEGV, &sigaction_handler, nullptr);
 			sigaction(SIGTERM, &sigaction_handler, nullptr);
 			sigaction(SIGQUIT, &sigaction_handler, nullptr);
 			sigaction(SIGINT, &sigaction_handler, nullptr);
@@ -122,6 +166,11 @@ namespace riscv {
 			}
 		}
 
+		void run_server()
+		{
+			server.listen("localhost", 1234);
+		}
+
 		exit_cause step(size_t count)
 		{
 			typename P::decode_type dec;
@@ -136,45 +185,63 @@ namespace riscv {
 			/* trap return path */
 			int cause;
 			if (unlikely((cause = setjmp(P::env)) > 0)) {
+				//// fprintf(stderr, "trap . "); fflush(stderr);
 				cause -= P::internal_cause_offset;
 				switch(cause) {
 					case P::internal_cause_cli:
+						//fprintf(stderr, "internal_cause_cli\n"); fflush(stderr);
 						return exit_cause_cli;
 					case P::internal_cause_fatal:
+						//fprintf(stderr, "internal_cause_fatal\n"); fflush(stderr);
 						P::print_csr_registers();
 						P::print_int_registers();
 						return exit_cause_poweroff;
 					case P::internal_cause_poweroff:
+						//fprintf(stderr, "internal_cause_poweroff\n"); fflush(stderr);
 						return exit_cause_poweroff;
 				}
+
+				//fprintf(stderr, "trap . "); fflush(stderr);
 				P::trap(dec, cause);
-				if (!P::running) return exit_cause_poweroff;
+				if (!P::running) {
+					//fprintf(stderr, "!running . exit_cause_poweroff\n"); fflush(stderr);
+					return exit_cause_poweroff;
+				}
 			}
 
 			/* step the processor */
 			while (P::instret != inststop) {
+				//fprintf(stderr, " + . "); fflush(stderr);
 				inst = P::mmu.inst_fetch(*this, P::pc, pc_offset);
 				inst_cache_key = inst % inst_cache_size;
 				if (inst_cache[inst_cache_key].inst == inst) {
+					//fprintf(stderr, " cached . "); fflush(stderr);
 					dec = inst_cache[inst_cache_key].dec;
 				} else {
+					//fprintf(stderr, " decoded . "); fflush(stderr);
 					P::inst_decode(dec, inst);
 					inst_cache[inst_cache_key].inst = inst;
 					inst_cache[inst_cache_key].dec = dec;
 				}
+				//fprintf(stderr, " exec= "); fflush(stderr);
 				if ((new_offset = P::inst_exec(dec, pc_offset)) != typename P::ux(-1)  ||
 					(new_offset = P::inst_priv(dec, pc_offset)) != typename P::ux(-1))
 				{
+					//fprintf(stderr, "ok . "); fflush(stderr);
 					if (P::log) P::print_log(dec, inst);
 					P::pc += new_offset;
 					P::instret++;
 				} else {
+					//fprintf(stderr, "ILLEGAL INSTRCUTION\n"); fflush(stderr);
+					// return exit_cause_continue;
 					P::raise(rv_cause_illegal_instruction, P::pc);
 				}
 				if (P::pc == P::breakpoint && P::breakpoint != 0) {
+					//fprintf(stderr, "exit_cause_cli\n"); fflush(stderr);
 					return exit_cause_cli;
 				}
 			}
+			//fprintf(stderr, "exit_cause_continue\n"); fflush(stderr);
 			return exit_cause_continue;
 		}
 	};
