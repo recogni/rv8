@@ -125,6 +125,7 @@ struct rv_emulator
 
 	host_cpu &cpu;
 	int proc_logs = 0;
+	bool server_enable = true;
 	bool help_or_error = false;
 	bool symbolicate = false;
 	uint64_t initial_seed = 0;
@@ -176,6 +177,9 @@ struct rv_emulator
 			{ "-d", "--debug", cmdline_arg_type_none,
 				"Start up in debugger CLI",
 				[&](std::string s) { return (proc_logs |= proc_log_ebreak_cli); } },
+			{ "-t", "--server", cmdline_arg_type_none,
+                "Enable HTTP server - use /step, /step/<n>, and /finish",
+                [&](std::string s) { return (server_enable = true); } },
 			{ "-x", "--no-pseudo", cmdline_arg_type_none,
 				"Disable Pseudoinstruction decoding",
 				[&](std::string s) { return (proc_logs |= proc_log_no_pseudo); } },
@@ -240,9 +244,16 @@ struct rv_emulator
 			P::mmu_type::memory_top, P::mmu_type::stack_size);
 
 		/* Initialize and run the processor */
-		proc.init();
-		proc.run(proc.log & proc_log_ebreak_cli ? exit_cause_cli : exit_cause_continue);
-		proc.destroy();
+        proc.init();
+        if (server_enable == true)
+        {
+            proc.run_server();
+        }
+        else
+        {
+            proc.run(proc.log & proc_log_ebreak_cli ? exit_cause_cli : exit_cause_continue);
+        }
+        proc.destroy();
 	}
 
 	/* Start a specific processor implementation based on ELF type */

@@ -64,15 +64,18 @@ INCLUDES :=     -I$(TOP_DIR)/src/abi \
                 -I$(TOP_DIR)/src/model \
                 -I$(TOP_DIR)/src/rom \
                 -I$(TOP_DIR)/src/util \
-                -I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit
+                -I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit \
+                -I$(TOP_DIR)/cpp-httplib
+
 OPT_FLAGS =     -O3 -fwrapv
 DEBUG_FLAGS =   -g
 WARN_FLAGS =    -Wall -Wsign-compare -Wno-deprecated-declarations -Wno-strict-aliasing
 CPPFLAGS =
 CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
-CXXFLAGS =      -std=c++1y -fno-rtti -fno-exceptions $(CFLAGS)
-LDFLAGS =       
+# CXXFLAGS =      -std=c++1y -fno-rtti -fno-exceptions $(CFLAGS)
+CXXFLAGS =      -std=c++1y -fno-rtti $(CFLAGS)
+LDFLAGS =
 ASM_FLAGS =     -S -masm=intel
 MACOS_LDFLAGS = -Wl,-pagezero_size,0x1000 -Wl,-no_pie -image_base 0x7ffe00000000
 LINUX_LDFLAGS = -pie -Wl,-Ttext-segment=0x7ffe00000000
@@ -613,12 +616,16 @@ $(RV_UTIL_LIB): $(RV_UTIL_OBJS)
 ifeq ($(ARCH),darwin_x86_64)
 MMAP_LIB = $(MMAP_MACOS_LIB)
 MMAP_FLAGS = -rpath $(DEST_DIR)/lib
+MMAP_OBJS = $(MMAP_MACOS_OBJS)
 endif
 
 ifeq ($(ARCH),linux_x86_64)
 MMAP_LIB = $(MMAP_LINUX_LIB)
 MMAP_FLAGS = -Wl,-rpath,$(DEST_DIR)/lib
+MMAP_OBJS = $(MMAP_LINUX_OBJS)
 endif
+
+sim-bin: $(RV_SIM_BIN)
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
 
@@ -646,7 +653,7 @@ $(RV_JIT_BIN): $(RV_JIT_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(ASMJI
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
-$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_LIB)
+$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_OBJS)
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
