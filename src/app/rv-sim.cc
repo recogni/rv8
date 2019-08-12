@@ -270,15 +270,16 @@ struct rv_emulator
 		#endif
 
 		/* execute */
-		switch (elf.ei_class) {
-			case ELFCLASS32:
-				start_proxy<proxy_emulator_rv32imafdc>(); break;
-				break;
-			case ELFCLASS64:
-				start_proxy<proxy_emulator_rv64imafdc>(); break;
-				break;
-			default: panic("illegal elf class");
-		}
+		// switch (elf.ei_class) {
+			// case ELFCLASS32:
+				start_proxy<proxy_emulator_rv32imafdc>();
+				// break;
+				// break;
+			// case ELFCLASS64:
+				// start_proxy<proxy_emulator_rv64imafdc>(); break;
+				// break;
+			// default: panic("illegal elf class");
+		// }
 	}
 };
 

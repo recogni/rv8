@@ -617,12 +617,14 @@ ifeq ($(ARCH),darwin_x86_64)
 MMAP_LIB = $(MMAP_MACOS_LIB)
 MMAP_FLAGS = -rpath $(DEST_DIR)/lib
 MMAP_OBJS = $(MMAP_MACOS_OBJS)
+MMAP_LDFLAGS = $(MMAP_MACOS_LDFLAGS)
 endif
 
 ifeq ($(ARCH),linux_x86_64)
 MMAP_LIB = $(MMAP_LINUX_LIB)
 MMAP_FLAGS = -Wl,-rpath,$(DEST_DIR)/lib
 MMAP_OBJS = $(MMAP_LINUX_OBJS)
+MMAP_LDFLAGS = $(MMAP_LINUX_LDFLAGS) -ldl
 endif
 
 sim-bin: $(RV_SIM_BIN)
@@ -655,7 +657,7 @@ $(RV_JIT_BIN): $(RV_JIT_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(ASMJI
 
 $(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_OBJS)
 	@mkdir -p $(@D) ;
-	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
+	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_LDFLAGS) $(MMAP_FLAGS) -o $@)
 
 $(RV_SYS_BIN): $(RV_SYS_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB)
 	@mkdir -p $(@D) ;

@@ -5,6 +5,7 @@
 #ifndef rv_processor_runloop_h
 #define rv_processor_runloop_h
 
+#include <strings.h>
 #include "httplib.h"
 
 namespace riscv {
@@ -29,7 +30,7 @@ namespace riscv {
 
 		using Request = httplib::Request;
         using Response = httplib::Response;
-        // httplib::Server server;
+        httplib::Server server;
 
 		struct rv_inst_cache_ent
 		{
@@ -158,7 +159,7 @@ namespace riscv {
 
 		void run_server()
         {
-        	// server.listen(host, 1234);
+        	server.listen(host, 1234);
         }
 
 		exit_cause step(size_t count)
