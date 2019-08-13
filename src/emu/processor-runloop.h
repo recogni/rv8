@@ -185,63 +185,49 @@ namespace riscv {
 			/* trap return path */
 			int cause;
 			if (unlikely((cause = setjmp(P::env)) > 0)) {
-				//// fprintf(stderr, "trap . "); fflush(stderr);
 				cause -= P::internal_cause_offset;
 				switch(cause) {
 					case P::internal_cause_cli:
-						//fprintf(stderr, "internal_cause_cli\n"); fflush(stderr);
 						return exit_cause_cli;
 					case P::internal_cause_fatal:
-						//fprintf(stderr, "internal_cause_fatal\n"); fflush(stderr);
 						P::print_csr_registers();
 						P::print_int_registers();
 						return exit_cause_poweroff;
 					case P::internal_cause_poweroff:
-						//fprintf(stderr, "internal_cause_poweroff\n"); fflush(stderr);
 						return exit_cause_poweroff;
 				}
 
-				//fprintf(stderr, "trap . "); fflush(stderr);
 				P::trap(dec, cause);
 				if (!P::running) {
-					//fprintf(stderr, "!running . exit_cause_poweroff\n"); fflush(stderr);
 					return exit_cause_poweroff;
 				}
 			}
 
 			/* step the processor */
 			while (P::instret != inststop) {
-				//fprintf(stderr, " + . "); fflush(stderr);
 				inst = P::mmu.inst_fetch(*this, P::pc, pc_offset);
 				inst_cache_key = inst % inst_cache_size;
 				if (inst_cache[inst_cache_key].inst == inst) {
-					//fprintf(stderr, " cached . "); fflush(stderr);
 					dec = inst_cache[inst_cache_key].dec;
 				} else {
-					//fprintf(stderr, " decoded . "); fflush(stderr);
 					P::inst_decode(dec, inst);
 					inst_cache[inst_cache_key].inst = inst;
 					inst_cache[inst_cache_key].dec = dec;
 				}
-				//fprintf(stderr, " exec= "); fflush(stderr);
 				if ((new_offset = P::inst_exec(dec, pc_offset)) != typename P::ux(-1)  ||
 					(new_offset = P::inst_priv(dec, pc_offset)) != typename P::ux(-1))
 				{
-					//fprintf(stderr, "ok . "); fflush(stderr);
 					if (P::log) P::print_log(dec, inst);
 					P::pc += new_offset;
 					P::instret++;
 				} else {
-					//fprintf(stderr, "ILLEGAL INSTRCUTION\n"); fflush(stderr);
 					// return exit_cause_continue;
 					P::raise(rv_cause_illegal_instruction, P::pc);
 				}
 				if (P::pc == P::breakpoint && P::breakpoint != 0) {
-					//fprintf(stderr, "exit_cause_cli\n"); fflush(stderr);
 					return exit_cause_cli;
 				}
 			}
-			//fprintf(stderr, "exit_cause_continue\n"); fflush(stderr);
 			return exit_cause_continue;
 		}
 	};
