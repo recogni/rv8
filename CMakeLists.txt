@@ -14,6 +14,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(ASMJIT_STATIC true)
 add_subdirectory(third_party/asmjit)
 
+add_definitions(-DRECOGNI)
+
 set(libriscv_asm_SOURCES
 	src/asm/assembler.cc
 	src/asm/disasm.cc
@@ -59,6 +61,9 @@ set(libriscv_util_SOURCES
 	src/util/util.cc
 	src/util/sha512.cc)
 
+set(libriscv_sim_SOURCES
+	src/app/rv-sim.cc)
+
 set(rv_bin_SOURCES
 	src/app/rv-dump.cc
 	src/app/rv-histogram.cc
@@ -102,6 +107,7 @@ add_library(riscv_gen ${libriscv_gen_SOURCES})
 add_library(riscv_elf ${libriscv_elf_SOURCES})
 add_library(riscv_model ${libriscv_model_SOURCES})
 add_library(riscv_util ${libriscv_util_SOURCES})
+add_library(riscv_sim ${libriscv_sim_SOURCES})
 
 add_executable(rv-bin ${rv_bin_SOURCES})
 target_link_libraries(rv-bin riscv_asm riscv_elf riscv_util)
@@ -112,7 +118,9 @@ target_link_libraries(rv-meta riscv_model riscv_gen riscv_util)
 add_executable(rv-sys src/app/rv-sys.cc)
 target_link_libraries(rv-sys ncurses riscv_asm riscv_elf riscv_util)
 
+include_directories("cpp-httplib")
 add_executable(rv-sim src/app/rv-sim.cc)
+target_compile_definitions(rv-sim PUBLIC -DNORECOGNI)
 target_link_libraries(rv-sim ncurses riscv_asm riscv_elf riscv_util ${MMAP_LIBS})
 
 add_executable(rv-jit src/app/rv-jit.cc)

@@ -8,6 +8,15 @@ RISC-V simulator for x86-64
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TKDFDG65GCXD2)
 
+## Installation
+
+The following are recogni install notes, subject to be wrong, etc etc.
+```
+git clone git@github.com:recogni/rv8
+mkdir -p rv8/build && cd $_
+cmake .. && make
+```
+
 **rv8** is a RISC-V simulation suite comprising a high performance x86-64 binary translator, a user mode simulator, a full system emulator, an ELF binary analysis tool and ISA metadata:
 
 * **rv-jit** - _user mode x86-64 binary translator_
@@ -67,7 +76,7 @@ The rv8 user mode simulator has the following features:
 The future goals of the rv8 project are:
 
 - Concise metadata representing the RISC-V ISA
-- Tools for metadata-based generation of source and documentation 
+- Tools for metadata-based generation of source and documentation
 - High performance emulation, sandboxing and binary translation
 - RISC-V-(n) → RISC-V-(n+1)
 - RISC-V-(n) → Intel i7 / AMD64 + AVX-512

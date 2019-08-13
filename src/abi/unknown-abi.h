@@ -809,9 +809,9 @@ namespace riscv {
 			printf("exit(%ld)\n", (long)proc.ireg[rv_ireg_a0]);
 		}
 		proc.exit(proc.ireg[rv_ireg_a0]);
-	#ifndef RECOGNI
+
+		// TODO: (sabhiram|jmb): Figure out how to gracefully exit.
 		exit(proc.ireg[rv_ireg_a0]);
-	#endif
 	}
 
 	template <typename P> void abi_sys_set_tid_address(P &proc)

@@ -83,6 +83,10 @@
 #include "debug-cli.h"
 #include "processor-runloop.h"
 
+#ifdef NORECOGNI
+#undef RECOGNI
+#endif // NORECOGNI
+
 using namespace riscv;
 
 /* Parameterized ABI proxy processor models */
@@ -271,10 +275,10 @@ struct rv_emulator
 		/* execute */
 		switch (elf.ei_class) {
 			case ELFCLASS32:
-				start_proxy<proxy_emulator_rv32imafdc>(); break;
+                start_proxy<proxy_emulator_rv32imafdc>(); break;
 				break;
 			case ELFCLASS64:
-				start_proxy<proxy_emulator_rv64imafdc>(); break;
+                start_proxy<proxy_emulator_rv64imafdc>(); break;
 				break;
 			default: panic("illegal elf class");
 		}
@@ -318,7 +322,6 @@ struct rv_emulator
 	template <typename P>
 	void fini_proxy(P& proc)
 	{
-		printf("Proxy destroyed!\n");
 		proc.destroy();
 	}
 
