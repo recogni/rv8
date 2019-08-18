@@ -5,6 +5,7 @@
 #ifndef rv_processor_runloop_h
 #define rv_processor_runloop_h
 
+#include <c++/../strings.h>
 #include "httplib.h"
 
 namespace riscv {
