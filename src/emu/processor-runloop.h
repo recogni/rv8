@@ -42,6 +42,11 @@ namespace riscv {
 		processor_runloop() : cli(std::make_shared<debug_cli<P>>()), inst_cache() {}
 		processor_runloop(std::shared_ptr<debug_cli<P>> cli) : cli(cli), inst_cache() {}
 
+		~processor_runloop()
+		{
+			server.stop();
+		}
+
 		static void signal_handler(int signum, siginfo_t *info, void *)
 		{
 			static_cast<processor_runloop<P>*>
