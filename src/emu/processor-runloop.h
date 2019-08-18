@@ -29,7 +29,7 @@ namespace riscv {
 
 		using Request = httplib::Request;
 		using Response = httplib::Response;
-		httplib::Server server;
+		std::shared_ptr<httplib::Server> server;
 
 		struct rv_inst_cache_ent
 		{
@@ -41,11 +41,6 @@ namespace riscv {
 
 		processor_runloop() : cli(std::make_shared<debug_cli<P>>()), inst_cache() {}
 		processor_runloop(std::shared_ptr<debug_cli<P>> cli) : cli(cli), inst_cache() {}
-
-		~processor_runloop()
-		{
-			server.stop();
-		}
 
 		static void signal_handler(int signum, siginfo_t *info, void *)
 		{
@@ -70,33 +65,6 @@ namespace riscv {
 
 		void init()
 		{
-			server.set_keep_alive_max_count(0);
-
-			// Server and route setup.
-			server.Get("/ping", [&](const Request& req, Response& rsp) {
-				rsp.set_content("PONG", "application/text");
-			});
-			server.Get("/step", [&](const Request& req, Response& rsp) {
-				const int ex = step(1);
-				if (ex != exit_cause_continue)
-					rsp.set_content("FINISHED", "application/text");
-				else
-					rsp.set_content("CONTINUE", "application/text");
-			});
-
-			server.Get(R"(/step/(\d+))", [&](const Request& req, Response& rsp) {
-				const uint n = std::stoi(req.matches[1]);
-				const int ex = step(n);
-				if (ex != exit_cause_continue)
-					rsp.set_content("FINISHED", "application/text");
-				else
-					rsp.set_content("CONTINUE", "application/text");
-			});
-
-			server.Get("/finish", [&](const Request& req, Response& rsp) {
-				run();
-			});
-
 			// block signals before so we don't deadlock in signal handlers
 			sigset_t set;
 			sigemptyset(&set);
@@ -174,7 +142,38 @@ namespace riscv {
 
 		void run_server()
 		{
-			server.listen("localhost", 1234);
+			if (!server)
+			{
+				server = std::make_shared<httplib::Server>();
+				server->set_keep_alive_max_count(0);
+
+				// Server and route setup.
+				server->Get("/ping", [&](const Request& req, Response& rsp) {
+					rsp.set_content("PONG", "application/text");
+				});
+				server->Get("/step", [&](const Request& req, Response& rsp) {
+					const int ex = step(1);
+					if (ex != exit_cause_continue)
+						rsp.set_content("FINISHED", "application/text");
+					else
+						rsp.set_content("CONTINUE", "application/text");
+				});
+
+				server->Get(R"(/step/(\d+))", [&](const Request& req, Response& rsp) {
+					const uint n = std::stoi(req.matches[1]);
+					const int ex = step(n);
+					if (ex != exit_cause_continue)
+						rsp.set_content("FINISHED", "application/text");
+					else
+						rsp.set_content("CONTINUE", "application/text");
+				});
+
+				server->Get("/finish", [&](const Request& req, Response& rsp) {
+					run();
+				});
+
+				server->listen("localhost", 1234);
+			}
 		}
 
 		exit_cause step(size_t count)
