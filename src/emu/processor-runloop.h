@@ -140,17 +140,20 @@ namespace riscv {
 			}
 		}
 
-		void run_server()
+		void run_server(const int server_port)
 		{
-			if (!server)
-			{
+			if (!server) {
 				server = std::make_shared<httplib::Server>();
+				if (!server) {
+					panic("error: could not create httplib::Server instance\n");
+				}
+
 				server->set_keep_alive_max_count(0);
 
-				// Server and route setup.
 				server->Get("/ping", [&](const Request& req, Response& rsp) {
 					rsp.set_content("PONG", "application/text");
 				});
+
 				server->Get("/step", [&](const Request& req, Response& rsp) {
 					const int ex = step(1);
 					if (ex != exit_cause_continue)
@@ -171,9 +174,9 @@ namespace riscv {
 				server->Get("/finish", [&](const Request& req, Response& rsp) {
 					run();
 				});
-
-				server->listen("localhost", 1234);
 			}
+
+			server->listen("localhost", server_port);
 		}
 
 		exit_cause step(size_t count)
@@ -219,6 +222,7 @@ namespace riscv {
 					inst_cache[inst_cache_key].inst = inst;
 					inst_cache[inst_cache_key].dec = dec;
 				}
+
 				if ((new_offset = P::inst_exec(dec, pc_offset)) != typename P::ux(-1)  ||
 					(new_offset = P::inst_priv(dec, pc_offset)) != typename P::ux(-1))
 				{
@@ -226,7 +230,6 @@ namespace riscv {
 					P::pc += new_offset;
 					P::instret++;
 				} else {
-					// return exit_cause_continue;
 					P::raise(rv_cause_illegal_instruction, P::pc);
 				}
 				if (P::pc == P::breakpoint && P::breakpoint != 0) {

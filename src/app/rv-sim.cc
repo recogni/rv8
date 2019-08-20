@@ -133,7 +133,7 @@ struct rv_emulator
 
 	host_cpu &cpu;
 	int proc_logs = 0;
-	bool server_enable = false;
+	int server_port = 0; 			// 0 => server disabled, port > 0 valid
 	bool help_or_error = false;
 	bool symbolicate = false;
 	uint64_t initial_seed = 0;
@@ -185,9 +185,9 @@ struct rv_emulator
 			{ "-d", "--debug", cmdline_arg_type_none,
 				"Start up in debugger CLI",
 				[&](std::string s) { return (proc_logs |= proc_log_ebreak_cli); } },
-			{ "-t", "--server", cmdline_arg_type_none,
+			{ "-t", "--server", cmdline_arg_type_string,
 				"Enable HTTP server - use /step, /step/<n>, and /finish",
-				[&](std::string s) { return (server_enable = true); } },
+				[&](std::string s) { server_port = strtoull(s.c_str(), nullptr, 10); return true; } },
 			{ "-x", "--no-pseudo", cmdline_arg_type_none,
 				"Disable Pseudoinstruction decoding",
 				[&](std::string s) { return (proc_logs |= proc_log_no_pseudo); } },
@@ -252,8 +252,8 @@ struct rv_emulator
 
 		/* Initialize and run the processor */
 		proc.init();
-		if (server_enable == true)
-			proc.run_server();
+		if (server_port > 0)
+			proc.run_server(server_port);
 		else
 			proc.run(proc.log & proc_log_ebreak_cli ? exit_cause_cli : exit_cause_continue);
 		proc.destroy();
