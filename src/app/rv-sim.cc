@@ -75,8 +75,8 @@
 #include "processor-impl.h"
 #include "interp.h"
 #include "processor-model.h"
-#include "mmu-proxy.h"
 #include "mmap-core.h"
+#include "mmu-proxy.h"
 #include "unknown-abi.h"
 #include "processor-histogram.h"
 #include "processor-proxy.h"
@@ -246,9 +246,9 @@ struct rv_emulator
 
 		/* Map ELF executable and setup the stack */
 		proc.map_executable(elf_filename, host_cmdline, symbolicate);
-		proc.map_proxy_stack(P::mmu_type::memory_top, P::mmu_type::stack_size);
-		proc.setup_proxy_stack(cpu, host_cmdline, host_env,
-			P::mmu_type::memory_top, P::mmu_type::stack_size);
+		//		proc.map_proxy_stack(P::mmu_type::memory_top, P::mmu_type::stack_size);
+		//		proc.setup_proxy_stack(cpu, host_cmdline, host_env,
+		//			P::mmu_type::memory_top, P::mmu_type::stack_size);
 
 		/* Initialize and run the processor */
 		proc.init();
