@@ -11,6 +11,9 @@ namespace riscv {
 	struct proxy_memory
 	{
 		std::vector<std::pair<void*,size_t>> segments;
+		std::vector<std::pair<void*,size_t>> text_segments;
+		std::vector<std::pair<void*,size_t>> ro_segments;
+		std::vector<std::pair<void*,size_t>> rw_segments;
 		addr_t heap_begin;
 		addr_t heap_end;
 		addr_t brk;
@@ -18,7 +21,8 @@ namespace riscv {
 
 		void print_memory_map() {}
 
-		proxy_memory() : segments(), heap_begin(0), heap_end(0), brk(0), log(false) {}
+	proxy_memory() : segments(), text_segments(), ro_segments(), rw_segments(),
+		    heap_begin(0), heap_end(0), brk(0), log(false) {}
 	};
 
 	template <typename UX, typename MEMORY = proxy_memory<UX>>
@@ -47,6 +51,45 @@ namespace riscv {
 		mmu_proxy() : mem(std::make_shared<MEMORY>()) {}
 		mmu_proxy(memory_type mem) : mem(mem) {}
 
+	        template <typename P> bool inst_addr_check(P &proc, addr_t pc)
+	        {
+		    for (auto &seg: mem->text_segments) {
+			addr_t addr = (addr_t) seg.first;
+			size_t len = seg.second;
+			if ((pc >= addr) && (pc < (addr_t) (addr + len))) {
+			    return true;
+			}
+		    }
+		    return false;
+		}
+		    
+
+	        template <typename P> bool ro_addr_check(P &proc, addr_t va)
+	        {
+		    for (auto &seg: mem->ro_segments) {
+			addr_t addr = (addr_t) seg.first;
+			size_t len = seg.second;
+			if ((va >= addr) && (va < (addr_t) (addr + len))) {
+			    return true;
+			}
+		    }
+		    return false;
+		}
+		    
+
+	        template <typename P> bool rw_addr_check(P &proc, addr_t va)
+	        {
+		    for (auto &seg: mem->rw_segments) {
+			addr_t addr = (addr_t) seg.first;
+			size_t len = seg.second;
+			if ((va >= addr) && (va < (addr_t) (addr + len))) {
+			    return true;
+			}
+		    }
+		    return false;
+		}
+		    
+
 		template <typename P> inst_t inst_fetch(P &proc, UX pc, typename P::ux &pc_offset)
 		{
 			/* record pc histogram using machine physical address */
@@ -64,6 +107,15 @@ namespace riscv {
 					}
 				}
 			}
+			if (!inst_addr_check(proc, pc)) {
+			        proc.raise(rv_cause_fault_fetch, pc_offset);
+			        return 0;
+			}
+			if ((pc & sizeof(u16)) != 0) {
+			        proc.raise(rv_cause_misaligned_fetch, pc);
+				return 0;
+			} 
+
 			return riscv::inst_fetch(pc, pc_offset);
 		}
 
@@ -72,6 +124,14 @@ namespace riscv {
 		template <typename P, typename T>
 		void amo(P &proc, const amo_op a_op, UX va, T &val1, T val2)
 		{
+  		        if (!rw_addr_check(proc, va)) {
+			        proc.raise(rv_cause_load_page_fault, va);
+			        return;
+			}
+			if ((va & (sizeof(T) - 1)) != 0) {
+			        proc.raise(rv_cause_misaligned_load, va);
+				return;
+			} 
 			val1 = UX(*(T*)addr_t(va & (memory_top - 1)));
 			val2 = amo_fn<UX>(a_op, val1, val2);
 			*((T*)addr_t(va & (memory_top - 1))) = val2;
@@ -79,6 +139,15 @@ namespace riscv {
 
 		template <typename P, typename T> void load(P &proc, UX va, T &val)
 		{
+   		        if (!rw_addr_check(proc, va) && !ro_addr_check(proc, va)) {
+			        proc.raise(rv_cause_load_page_fault, va);
+			        return;
+			}
+			if ((va & (sizeof(T) - 1)) != 0) {
+			        proc.raise(rv_cause_misaligned_load, va);
+				return;
+			} 
+
 			if (enfore_memory_top) {
 				val = UX(*(T*)addr_t(va & (memory_top - 1)));
 			} else {
@@ -88,6 +157,15 @@ namespace riscv {
 
 		template <typename P, typename T> void store(P &proc, UX va, T val)
 		{
+		        if (!rw_addr_check(proc, va)) {
+			        proc.raise(rv_cause_store_page_fault, va);
+			        return;
+			} 
+			if ((va & (sizeof(T) - 1)) != 0) {
+			        proc.raise(rv_cause_misaligned_store, va);
+				return;
+			} 
+
 			if (enfore_memory_top) {
 				*((T*)addr_t(va & (memory_top - 1))) = val;
 			} else {
