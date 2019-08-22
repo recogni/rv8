@@ -323,8 +323,16 @@ namespace riscv {
 			if (!imagebase) imagebase = map_vaddr;
 
 			/* map the segment */
-			void *addr = guest_mmap((void*)map_vaddr, map_len,
-				elf_p_flags_mmap(phdr.p_flags), MAP_FIXED | MAP_PRIVATE, fd, map_offset);
+			void *addr;
+			if (phdr.p_filesz == 0) {
+			    addr = guest_mmap((void*)map_vaddr, map_len,
+					      elf_p_flags_mmap(phdr.p_flags),
+					      MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0);
+			} else {
+			    addr = guest_mmap((void*)map_vaddr, map_len,
+					      elf_p_flags_mmap(phdr.p_flags),
+					      MAP_FIXED | MAP_PRIVATE, fd, map_offset);
+			}
 			close(fd);
 			if (addr == MAP_FAILED) {
 				panic("map_executable: error: mmap: %s: %s", filename, strerror(errno));
@@ -346,6 +354,14 @@ namespace riscv {
 			/* add the mmap to the emulator proxy_mmu */
 			P::mmu.mem->segments.push_back(std::pair<void*,size_t>((void*)map_vaddr, map_len));
 
+			/* Add to the apprpriate segment list */
+			if (phdr.p_flags & PF_X) {
+			    P::mmu.mem->text_segments.push_back(std::pair<void*,size_t>((void*)map_vaddr, map_len));
+			} else if (phdr.p_flags & PF_W) {
+			    P::mmu.mem->rw_segments.push_back(std::pair<void*,size_t>((void*)map_vaddr, map_len));
+			} else {
+			    P::mmu.mem->ro_segments.push_back(std::pair<void*,size_t>((void*)map_vaddr, map_len));
+			} 
 			/* set heap mmap area begin and end */
 			if (P::mmu.mem->heap_begin < map_end) {
 				P::mmu.mem->heap_begin = P::mmu.mem->heap_end = map_end;
