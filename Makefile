@@ -12,7 +12,8 @@ BIN_DIR =       $(BUILD_DIR)/$(ARCH)/bin
 LIB_DIR =       $(BUILD_DIR)/$(ARCH)/lib
 OBJ_DIR =       $(BUILD_DIR)/$(ARCH)/obj
 DEP_DIR =       $(BUILD_DIR)/$(ARCH)/dep
-DEST_DIR =      /usr/local
+#DEST_DIR =      /usr/local
+DEST_DIR =      /opt/rv8
 
 # check which c++ compiler to use (default clang). e.g. make prefer_gcc=1
 ifeq ($(CXX),)
@@ -67,7 +68,8 @@ INCLUDES :=     -I$(TOP_DIR)/src/abi \
 				-I$(TOP_DIR)/$(ASMJIT_SRC_DIR)/asmjit \
 				-I$(TOP_DIR)/cpp-httplib
 
-OPT_FLAGS =     -O3 -fwrapv
+#OPT_FLAGS =     -O3 -fwrapv
+OPT_FLAGS =     -fwrapv
 DEBUG_FLAGS =   -g
 WARN_FLAGS =    -Wall -Wsign-compare -Wno-deprecated-declarations -Wno-strict-aliasing
 CPPFLAGS =
@@ -76,7 +78,7 @@ CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
 CXXFLAGS =      -std=c++1y -fno-rtti $(CFLAGS)
 LDLIBFLAGS =     -r -Wl,-s
-LDFLAGS =
+LDFLAGS =       -L $(DIST_DIR)/lib
 ASM_FLAGS =     -S -masm=intel
 MACOS_LDFLAGS = -Wl,-pagezero_size,0x1000 -Wl,-no_pie -image_base 0x7ffe00000000
 LINUX_LDFLAGS = -pie -Wl,-Ttext-segment=0x7ffe00000000
@@ -451,9 +453,12 @@ ASSEMBLY = $(TEST_CC_ASM)
 
 # build rules
 
-all: meta $(BINARIES) $(ASSEMBLY)
+all: meta $(RV_META_BIN) $(RV_SIM_BIN) $(RV_SYS_BIN) $(RV_BIN_BIN) $(RV_JIT_BIN)
 # all: meta $(RV_ASM_OBJS)
-clean: ; @echo "CLEAN $(BUILD_DIR)"; rm -rf $(BUILD_DIR)
+clean:
+	@echo "CLEAN $(BUILD_DIR)"
+	rm -rf $(BUILD_DIR)
+
 backup: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar -czf $${dir}-backup-$$(date '+%Y%m%d').tar.gz $${dir}
 dist: clean ; dir=$$(basename $$(pwd)) ; cd .. && tar --exclude .git -czf $${dir}-$$(date '+%Y%m%d').tar.gz $${dir}
 
@@ -631,8 +636,8 @@ endif
 
 sim-lib: $(RV_SIM_LIB)
 
-$(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS) $(RV_ASM_OBJS)
-	$(call cmd, SIMLIB $@, $(CXX) $(LDLIBFLAGS) -o $@ $^)
+$(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
+	$(call cmd, SIMLIB $@, $(CC) $(LDLIBFLAGS) -o $@ $^)
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
 
@@ -660,7 +665,7 @@ $(RV_JIT_BIN): $(RV_JIT_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(ASMJI
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
-$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_OBJS)
+$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_LIB)
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
