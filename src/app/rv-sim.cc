@@ -88,7 +88,7 @@
 #endif // NORECOGNI
 
 #ifdef RECOGNI
-#include " pin.h"
+#include "pin.h"
 #endif
 
 using namespace riscv;
@@ -380,13 +380,14 @@ void emulation_fini()
     emulator.fini_proxy(proc);
 }
 
-int emulation_pin_get(std:string pin_type, unsigned pin_instance) {
-    return proc.pin.ext_pin_get(pin_type, pin_instance);
+int emulation_pin_get(std::string pin_type, unsigned pin_instance) {
+    return proc.pins.pin_get(pin_type, pin_instance);
 }
 
-void emulation_pin_set(std:string pin_type, unsigned pin_instance,
+void emulation_pin_set(std::string pin_type, unsigned pin_instance,
 		       int pullup, int val) {
-    proc.pin.ext_pin_set(pin_type, pin_instance, pullup, val);
+    proc.pins.ext_pin_set(pin_type, pin_instance, val);
+    proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
 #else  // !RECOGNI

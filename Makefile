@@ -73,8 +73,8 @@ OPT_FLAGS =     -fwrapv
 DEBUG_FLAGS =   -g
 WARN_FLAGS =    -Wall -Wsign-compare -Wno-deprecated-declarations -Wno-strict-aliasing
 CPPFLAGS =
-# CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -DRECOGNI
-CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
+CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -DRECOGNI
+#CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
 CXXFLAGS =      -std=c++1y -fno-rtti $(CFLAGS)
 LDLIBFLAGS =     -r -Wl,-s
@@ -332,13 +332,14 @@ RV_JIT_BIN =  $(BIN_DIR)/rv-jit
 # rv-sim
 RV_SIM_SRCS = $(SRC_DIR)/app/rv-sim.cc
 RV_SIM_OBJS = $(call cxx_src_objs, $(RV_SIM_SRCS))
-RV_SIM_BIN =  $(BIN_DIR)/rv-sim
+#RV_SIM_BIN =  $(BIN_DIR)/rv-sim
 RV_SIM_LIB =   $(LIB_DIR)/libriscv_sim.a
 
 # rv-sys
 RV_SYS_SRCS = $(SRC_DIR)/app/rv-sys.cc
 RV_SYS_OBJS = $(call cxx_src_objs, $(RV_SYS_SRCS))
-RV_SYS_BIN =  $(BIN_DIR)/rv-sys
+#RV_SYS_BIN =  $(BIN_DIR)/rv-sys
+RV_SYS_LIB =   $(LIB_DIR)/libriscv_sys.a
 
 # test-bits
 TEST_BITS_SRCS = $(SRC_DIR)/app/test-bits.cc
@@ -634,9 +635,12 @@ MMAP_FLAGS = -Wl,-rpath,$(DEST_DIR)/lib
 MMAP_OBJS = $(MMAP_LINUX_OBJS)
 endif
 
-sim-lib: $(RV_SIM_LIB)
+sim-lib: $(RV_SIM_LIB) $(RV_SYS_LIB) 
 
 $(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
+	$(call cmd, SIMLIB $@, $(CC) $(LDLIBFLAGS) -o $@ $^)
+
+$(RV_SYS_LIB): $(RV_SYS_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
 	$(call cmd, SIMLIB $@, $(CC) $(LDLIBFLAGS) -o $@ $^)
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
