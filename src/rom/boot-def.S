@@ -2,11 +2,11 @@
 .eqv xlenb, 8
 
 .macro lx rd, rs1
-	ld \rd, \rs1
+	lw \rd, \rs1
 .endm
 
 .macro sx rd, rs1
-	sd \rd, \rs1
+	sw \rd, \rs1
 .endm
 
 # M-Mode constants

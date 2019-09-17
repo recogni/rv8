@@ -479,12 +479,12 @@ doc/pdf/riscv-types.pdf: doc/tex/riscv-types.tex ; @mkdir -p doc/pdf
 # rom
 
 ROM_MK = src/rom/rom.mk
-rom: ; $(MAKE) -f $(ROM_MK) all ARCH=rv64imafd TARGET=riscv64-unknown-elf
+rom: ; $(MAKE) -f $(ROM_MK) all ARCH=rv32imafd TARGET=riscv32-unknown-elf
 
 # sample-asm
 
 ASM_MK = src/sample/asm.mk
-sample-asm: ; $(MAKE) -f $(ASM_MK) all ARCH=rv64imafd TARGET=riscv64-unknown-elf
+sample-asm: ; $(MAKE) -f $(ASM_MK) all ARCH=rv32imafd TARGET=riscv32-unknown-elf
 
 # linux bootstrap
 

@@ -228,10 +228,10 @@ mcall_shutdown:
 
 mcall_set_timer:
 	li      t0, RTC_MMIO_BASE
-	ld      t1, 0(t0)              # read from mtime
+	lw      t1, 0(t0)              # read from mtime
 	add     t2, t1, a0             # add arg0 to current time
 	li      t0, TIMER_MMIO_BASE
-	sd      t2, 0(t0)              # write to mtimecmp
+	sw      t2, 0(t0)              # write to mtimecmp
 	lx      t0, 0*xlenb(sp)        # restore regs to avoid
 	lx      t1, 1*xlenb(sp)        # information leakage
 	csrrw   sp, mscratch, sp

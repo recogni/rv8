@@ -87,6 +87,10 @@
 #undef RECOGNI
 #endif // NORECOGNI
 
+#ifdef RECOGNI
+#include " pin.h"
+#endif
+
 using namespace riscv;
 
 /* Parameterized ABI proxy processor models */
@@ -338,6 +342,8 @@ struct rv_emulator
 		}
 		#endif
 	}
+
+      
 #endif  // RECOGNI
 
 };
@@ -372,6 +378,15 @@ char *emulation_debug(char *debug_cmd)
 void emulation_fini()
 {
     emulator.fini_proxy(proc);
+}
+
+int emulation_pin_get(std:string pin_type, unsigned pin_instance) {
+    return proc.pin.ext_pin_get(pin_type, pin_instance);
+}
+
+void emulation_pin_set(std:string pin_type, unsigned pin_instance,
+		       int pullup, int val) {
+    proc.pin.ext_pin_set(pin_type, pin_instance, pullup, val);
 }
 
 #else  // !RECOGNI

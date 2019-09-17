@@ -111,7 +111,7 @@ namespace riscv {
 			        proc.raise(rv_cause_fault_fetch, pc_offset);
 			        return 0;
 			}
-			if ((pc & sizeof(u16)) != 0) {
+			if ((pc & (sizeof(u16) - 1)) != 0) {
 			        proc.raise(rv_cause_misaligned_fetch, pc);
 				return 0;
 			} 

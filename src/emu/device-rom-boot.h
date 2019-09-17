@@ -19,16 +19,16 @@ namespace riscv {
 
 		P &proc;
 
-		constexpr u8* as_u8() { return (u8*)&build_riscv64_unknown_elf_bin_boot_rom_bin[0]; }
-		constexpr u16* as_u16() { return (u16*)&build_riscv64_unknown_elf_bin_boot_rom_bin[0]; }
-		constexpr u32* as_u32() { return (u32*)&build_riscv64_unknown_elf_bin_boot_rom_bin[0]; }
-		constexpr u64* as_u64() { return (u64*)&build_riscv64_unknown_elf_bin_boot_rom_bin[0]; }
+		constexpr u8* as_u8() { return (u8*)&build_riscv32_unknown_elf_bin_boot_rom_bin[0]; }
+		constexpr u16* as_u16() { return (u16*)&build_riscv32_unknown_elf_bin_boot_rom_bin[0]; }
+		constexpr u32* as_u32() { return (u32*)&build_riscv32_unknown_elf_bin_boot_rom_bin[0]; }
+		constexpr u64* as_u64() { return (u64*)&build_riscv32_unknown_elf_bin_boot_rom_bin[0]; }
 
 		/* BOOT constructor */
 
 		boot_mmio_device(P &proc, UX mpa) :
 			memory_segment<UX>("ROM", mpa, /*uva*/0,
-				/*size*/build_riscv64_unknown_elf_bin_boot_rom_bin_len,
+				/*size*/build_riscv32_unknown_elf_bin_boot_rom_bin_len,
 				pma_type_main | pma_prot_read | pma_prot_execute), proc(proc) {}
 
 		/* BOOT MMIO */

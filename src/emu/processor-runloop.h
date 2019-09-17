@@ -238,6 +238,7 @@ namespace riscv {
 			}
 			return exit_cause_continue;
 		}
+
 	};
 
 }

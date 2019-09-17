@@ -354,7 +354,7 @@ core {
 			device_plic = std::make_shared<plic_mmio_device<processor_privileged>>(*this, 0x40002000);
 			device_uart = std::make_shared<uart_mmio_device<processor_privileged>>(*this, 0x40003000, device_plic, 3, console);
 			device_timer = std::make_shared<timer_mmio_device<processor_privileged>>(*this, 0x40004000);
-			device_gpio = std::make_shared<gpio_mmio_device<processor_privileged>>(*this, 0x40005000, device_plic, 4);
+			device_gpio = std::make_shared<gpio_mmio_device<processor_privileged>>(*this, 0x40005000, device_plic, 4, 0);
 			device_rand = std::make_shared<rand_mmio_device<processor_privileged>>(*this, 0x40006000);
 			device_htif = std::make_shared<htif_mmio_device<processor_privileged>>(*this, 0x40008000, console);
 			device_config = std::make_shared<config_mmio_device<processor_privileged>>(*this, 0x4000f000);

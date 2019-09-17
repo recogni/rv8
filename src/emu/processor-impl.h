@@ -5,6 +5,8 @@
 #ifndef rv_processor_impl_h
 #define rv_processor_impl_h
 
+#include "pin.h"
+
 namespace riscv {
 
 	/* Interpreter Exit Causes */
@@ -54,7 +56,8 @@ namespace riscv {
 		hist_reg_map_t hist_reg;
 		hist_inst_map_t hist_inst;
 		std::function<const char*(addr_t)> symlookup;
-
+		ext_pins pins;
+		
 		processor_impl() : P()
 		{
 			hist_pc.set_empty_key(0);
