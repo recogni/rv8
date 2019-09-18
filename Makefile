@@ -461,7 +461,7 @@ ASSEMBLY = $(TEST_CC_ASM)
 
 # build rules
 
-all: meta $(RV_META_BIN) $(RV_SIM_BIN) $(RV_SYS_BIN) $(RV_BIN_BIN) $(RV_JIT_BIN)
+all: meta $(RV_META_BIN) $(RV_SIM_BIN) $(RV_SYS_BIN) $(RV_BIN_BIN) $(RV_JIT_BIN) sim_lib
 # all: meta $(RV_ASM_OBJS)
 clean:
 	@echo "CLEAN $(BUILD_DIR)"
@@ -645,10 +645,10 @@ endif
 sim-lib: $(RV_SIM_LIB) $(RV_SYS_LIB) 
 
 $(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
-	$(call cmd, SIMLIB $@, $(CC) $(LDLIBFLAGS) -o $@ $^)
+	$(call cmd, SIMLIB $@, $(CC) $(LDFLAGS) $(MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
 
 $(RV_SYS_LIB): $(RV_SYS_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
-	$(call cmd, SIMLIB $@, $(CC) $(LDLIBFLAGS) -o $@ $^)
+	$(call cmd, SYSLIB $@, $(CC) $(LDFLAGS) $(MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
 

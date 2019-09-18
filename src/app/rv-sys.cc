@@ -9,17 +9,14 @@ using priv_emulator_rv32imafdc = processor_runloop<processor_privileged<processo
 using priv_emulator_rv64imafdc = processor_runloop<processor_privileged<processor_rv64imafdc_model<decode,processor_priv_rv64imafd,mmu_soft_rv64>>>;
 
 
-
-#ifdef RECOGNI
-
-proxy_emulator_rv32imafdc proc;
+priv_emulator_rv32imafdc proc;
 rv_emulator emulator;
 
 int emulation_setup(int argc, const char* argv[], const char* envp[])
 {
 	emulator.parse_commandline(argc, argv, envp);
 	emulator.load();
-	emulator.setup_proxy<proxy_emulator_rv32imafdc>(proc);
+	emulator.setup_priv<priv_emulator_rv32imafdc>(proc);
 	return 0;
 }
 
@@ -32,14 +29,14 @@ int emulation_run(size_t count)
 
 char *emulation_debug(char *debug_cmd)
 {
-    std::shared_ptr<debug_cli<proxy_emulator_rv32imafdc>> cli;
+    std::shared_ptr<debug_cli<priv_emulator_rv32imafdc>> cli;
     cli->one_shot(&proc, debug_cmd);
     return NULL;
 }
 
 void emulation_fini()
 {
-    emulator.fini_proxy(proc);
+    emulator.fini_priv(proc);
 }
 
 int emulation_pin_get(std::string pin_type, unsigned pin_instance) {
@@ -52,4 +49,3 @@ void emulation_pin_set(std::string pin_type, unsigned pin_instance,
     proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
-#endif  // RECOGNI
