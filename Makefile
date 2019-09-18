@@ -301,6 +301,11 @@ RV_FPU_GEN =    $(SRC_DIR)/test/test-fpu-gen.c
 TEST_CC_SRC =   $(SRC_DIR)/app/test-cc.cc
 TEST_CC_ASM =   $(ASM_DIR)/test-cc.s
 
+RV_SIM_MAIN_SRCS = $(SRC_DIR)/app/rv-sim-main.cc
+RV_SIM_MAIN_OBJS =  $(call cxx_src_objs, $(RV_SIM_MAIN_SRCS))
+RV_SYS_MAIN_SRCS = $(SRC_DIR)/app/rv-sys-main.cc
+RV_SYS_MAIN_OBJS =  $(call cxx_src_objs, $(RV_SYS_MAIN_SRCS))
+
 # libriscv_asm
 RV_ASM_SRCS =   $(SRC_DIR)/asm/assembler.cc \
 				$(SRC_DIR)/asm/disasm.cc \
@@ -332,13 +337,13 @@ RV_JIT_BIN =  $(BIN_DIR)/rv-jit
 # rv-sim
 RV_SIM_SRCS = $(SRC_DIR)/app/rv-sim.cc
 RV_SIM_OBJS = $(call cxx_src_objs, $(RV_SIM_SRCS))
-#RV_SIM_BIN =  $(BIN_DIR)/rv-sim
+RV_SIM_BIN =  $(BIN_DIR)/rv-sim
 RV_SIM_LIB =   $(LIB_DIR)/libriscv_sim.a
 
 # rv-sys
 RV_SYS_SRCS = $(SRC_DIR)/app/rv-sys.cc
 RV_SYS_OBJS = $(call cxx_src_objs, $(RV_SYS_SRCS))
-#RV_SYS_BIN =  $(BIN_DIR)/rv-sys
+RV_SYS_BIN =  $(BIN_DIR)/rv-sys
 RV_SYS_LIB =   $(LIB_DIR)/libriscv_sys.a
 
 # test-bits
@@ -423,6 +428,8 @@ ALL_CXX_SRCS = $(RV_ASM_SRCS) \
 		   $(RV_META_SRCS) \
 		   $(RV_SIM_SRCS) \
 		   $(RV_SYS_SRCS) \
+		   $(RV_SIM_MAIN_SRCS) \
+		   $(RV_SYS_MAIN_SRCS) \
 		   $(TEST_BITS_SRCS) \
 		   $(TEST_ENCODER_SRCS) \
 		   $(TEST_ENDIAN_SRCS) \
@@ -669,11 +676,11 @@ $(RV_JIT_BIN): $(RV_JIT_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(ASMJI
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
-$(RV_SIM_BIN): $(RV_SIM_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_LIB)
+$(RV_SIM_BIN): $(RV_SIM_MAIN_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB) $(MMAP_LIB)
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) $(MMAP_FLAGS) -o $@)
 
-$(RV_SYS_BIN): $(RV_SYS_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB)
+$(RV_SYS_BIN): $(RV_SYS_MAIN_OBJS) $(RV_ASM_LIB) $(RV_ELF_LIB) $(RV_UTIL_LIB)
 	@mkdir -p $(@D) ;
 	$(call cmd, LD $@, $(LD) $^ $(LDFLAGS) -o $@)
 

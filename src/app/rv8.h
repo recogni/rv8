@@ -3,6 +3,7 @@
 
 #include <string>
 
+#ifdef RECOGNI
 int emulation_setup(int argc, const char* argv[], const char* envp[]);
 int emulation_run(size_t count);
 char *emulation_debug(char *cmd);
@@ -18,6 +19,6 @@ int emulation_pin_get(std::string pin_type, unsigned pin_instance);
 void emulation_pin_set(std::string pin_type, unsigned pin_instance,
 		       int pullup, int val);
 
-
+#endif
 
 #endif
