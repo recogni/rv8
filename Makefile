@@ -461,7 +461,7 @@ ASSEMBLY = $(TEST_CC_ASM)
 
 # build rules
 
-all: meta $(RV_META_BIN) $(RV_SIM_BIN) $(RV_SYS_BIN) $(RV_BIN_BIN) $(RV_JIT_BIN) sim_lib
+all: meta $(RV_META_BIN) $(RV_SIM_BIN) $(RV_SYS_BIN) $(RV_BIN_BIN) $(RV_JIT_BIN) sim-lib
 # all: meta $(RV_ASM_OBJS)
 clean:
 	@echo "CLEAN $(BUILD_DIR)"
