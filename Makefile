@@ -543,6 +543,8 @@ install:
 	install $(RV_SYS_BIN) $(DEST_DIR)/bin/rv-sys
 	install $(RV_JIT_BIN) $(DEST_DIR)/bin/rv-jit
 	install $(MMAP_LIB) $(DEST_DIR)/lib/
+	install $(RV_SIM_LIB) $(DEST_DIR)/lib/
+	install $(RV_SYS_LIB) $(DEST_DIR)/lib/
 
 # metadata targets
 
