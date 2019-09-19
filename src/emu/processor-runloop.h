@@ -5,6 +5,16 @@
 #ifndef rv_processor_runloop_h
 #define rv_processor_runloop_h
 
+// TODO(sabhiram) : HTTP server requires the below hack -- can we remove?
+/*
+ *  Because the smart people at RV8 have chosen to call one of their string 
+ *  libraries `strings.h` and we require the actual linux/osx strings.h to be 
+ *  included, we are forced to add a path explicitly forcing the variant of the
+ *  file we want. Since `c++/../strings.h` which we used to rely on does not 
+ *  *ALWAYS* show up on OSX (without xcode installed for example), we use the 
+ *  ever-present `net` directory to force this file.
+ */
+#include <net/../strings.h>
 #include "httplib.h"
 
 namespace riscv {
