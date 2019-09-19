@@ -300,11 +300,6 @@ struct rv_emulator
 				host_env.push_back(*env);
 			}
 		}
-
-		/* load ELF */
-		if (ram_boot == 0) {
-			elf.load(boot_filename, elf_load_headers);
-		}
 	}
 
 	/* Start the execuatable with the given privileged processor template */
@@ -388,6 +383,9 @@ struct rv_emulator
 		proc.device_config->ram_base = default_ram_base;
 		proc.device_config->ram_size = default_ram_size;
 
+		/* Override the reset vector */
+		proc.pc = rom_entry;
+
 #if defined (ENABLE_GPERFTOOL)
 		ProfilerStart("test-emulate.out");
 #endif
@@ -408,6 +406,11 @@ struct rv_emulator
 	/* Start a specific processor implementation based on ELF type and ISA extensions */
 	void exec()
 	{
+		if (ram_boot == 0) {
+		    /* load ELF */
+		    elf.load(boot_filename, elf_load_headers);
+		}
+
 		/* check for RDTSCP on X86 */
 		#if X86_USE_RDTSCP
 		if (cpu.caps.size() > 0 && cpu.caps.find("RDTSCP") == cpu.caps.end()) {
