@@ -6,6 +6,7 @@
 #define rv_util_h
 
 extern bool parse_integral(std::string valstr, long long &val);
+extern bool parse_addr(std::string valstr, unsigned long long &val);
 
 extern std::string format_string(const char* fmt, ...);
 extern void log_format(FILE *file, const char* fmt, va_list arg);

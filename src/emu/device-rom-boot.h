@@ -33,7 +33,7 @@ namespace riscv {
 
 		/* BOOT MMIO */
 
-		buserror_t load_8 (UX va, u8  &val)
+		buserror_t load_8 (addr_t va, u8  &val)
 		{
 			val = (va < seg_type::size) ? *(as_u8() + va) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -42,7 +42,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_16(UX va, u16 &val)
+		buserror_t load_16(addr_t va, u16 &val)
 		{
 			val = (va < seg_type::size - 1) ? *(as_u16() + (va>>1)) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -51,7 +51,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_32(UX va, u32 &val)
+		buserror_t load_32(addr_t va, u32 &val)
 		{
 			val = (va < seg_type::size - 3) ? *(as_u32() + (va>>2)) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -60,7 +60,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_64(UX va, u64 &val)
+		buserror_t load_64(addr_t va, u64 &val)
 		{
 			val = (va < seg_type::size - 7) ? *(as_u64() + (va>>3)) : 0;
 			if (proc.log & proc_log_mmio) {

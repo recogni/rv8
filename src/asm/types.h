@@ -43,7 +43,7 @@ namespace riscv {
 	typedef double             f64;
 	typedef float              f32;
 
-	typedef s64                addr_t;
+	typedef u64                addr_t;
 	typedef s64                integral_t;
 	typedef u64                inst_t;
 	typedef u32                label_t;

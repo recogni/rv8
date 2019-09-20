@@ -31,7 +31,7 @@ namespace riscv {
 
 		/* RAND MMIO */
 
-		buserror_t load_8 (UX va, u8  &val)
+		buserror_t load_8 (addr_t va, u8  &val)
 		{
 			u8 r = cpu.get_random_seed();
 			val = (va < total_size) ? r : 0;
@@ -41,7 +41,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_16(UX va, u16 &val)
+		buserror_t load_16(addr_t va, u16 &val)
 		{
 			u16 r = cpu.get_random_seed();
 			val = (va < total_size - 1) ? r : 0;
@@ -51,7 +51,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_32(UX va, u32 &val)
+		buserror_t load_32(addr_t va, u32 &val)
 		{
 			u32 r = cpu.get_random_seed();
 			val = (va < total_size - 3) ? r : 0;
@@ -61,7 +61,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_64(UX va, u64 &val)
+		buserror_t load_64(addr_t va, u64 &val)
 		{
 			u64 r = (u64(cpu.get_random_seed()) << 32) | u64(cpu.get_random_seed());
 			val = (va < total_size - 7) ? r : 0;

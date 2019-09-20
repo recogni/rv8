@@ -28,8 +28,8 @@ namespace riscv {
 	    pin_instance(pin_instance)
 	{
 	    /* Set everything to Z */
-	    pin_internal = 0;
-	    pin_external = 0;
+	    pin_internal = 'Z';
+	    pin_external = 'Z';
 	    pullup_internal = 0;
 	    pullup_external = 0;
 	}

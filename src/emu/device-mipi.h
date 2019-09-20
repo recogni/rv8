@@ -61,7 +61,7 @@ namespace riscv {
 
 		/* MIPI MMIO */
 
-		buserror_t load_8 (UX va, u8  &val)
+		buserror_t load_8 (addr_t va, u8  &val)
 		{
 			val = (va < total_size) ? *(as_u8() + va) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -70,7 +70,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_16(UX va, u16 &val)
+		buserror_t load_16(addr_t va, u16 &val)
 		{
 			val = (va < total_size - 1) ? *(as_u16() + (va>>1)) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -79,7 +79,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_32(UX va, u32 &val)
+		buserror_t load_32(addr_t va, u32 &val)
 		{
 			val = (va < total_size - 3) ? *(as_u32() + (va>>2)) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -88,7 +88,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t load_64(UX va, u64 &val)
+		buserror_t load_64(addr_t va, u64 &val)
 		{
 			val = (va < total_size - 7) ? *(as_u64() + (va>>3)) : 0;
 			if (proc.log & proc_log_mmio) {
@@ -97,7 +97,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t store_8 (UX va, u8  val)
+		buserror_t store_8 (addr_t va, u8  val)
 		{
 			if (proc.log & proc_log_mmio) {
 				printf("mipi_mmio:0x%04llx <- 0x%02hhx\n", addr_t(va), val);
@@ -106,7 +106,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t store_16(UX va, u16 val)
+		buserror_t store_16(addr_t va, u16 val)
 		{
 			if (proc.log & proc_log_mmio) {
 				printf("mipi_mmio:0x%04llx <- 0x%04hx\n", addr_t(va), val);
@@ -115,7 +115,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t store_32(UX va, u32 val)
+		buserror_t store_32(addr_t va, u32 val)
 		{
 			if (proc.log & proc_log_mmio) {
 				printf("mipi_mmio:0x%04llx <- 0x%08x\n", addr_t(va), val);
@@ -124,7 +124,7 @@ namespace riscv {
 			return 0;
 		}
 
-		buserror_t store_64(UX va, u64 val)
+		buserror_t store_64(addr_t va, u64 val)
 		{
 			if (proc.log & proc_log_mmio) {
 				printf("mipi_mmio:0x%04llx <- 0x%016llx\n", addr_t(va), val);

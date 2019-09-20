@@ -261,7 +261,7 @@ struct rv_emulator
 				[&](std::string s) { return (proc_logs |= proc_log_no_pseudo); } },
 			{ "-p", "--map-physical", cmdline_arg_type_string,
 				"Map execuatable at physical address",
-				[&](std::string s) { return parse_integral(s, map_physical); } },
+				[&](std::string s) { return parse_addr(s, map_physical); } },
 			{ "-b", "--binary", cmdline_arg_type_string,
 				"Boot Binary ( 32, 64 )",
 				[&](std::string s) { return parse_integral(s, ram_boot); } },

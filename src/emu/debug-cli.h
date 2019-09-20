@@ -64,6 +64,7 @@ namespace riscv {
 			add_command(cmd_quit,   1, 1, "quit",   "",                 "End Simulation");
 			add_command(cmd_reg,    1, 1, "reg",    "",                 "Show Registers");
 			add_command(cmd_run,    1, 2, "run",    "[count]",          "Step processor");
+			add_command(cmd_step,   1, 2, "step",    "[count]",          "Step processor");
 		}
 
 		void add_command(cmd_fn fn, size_t min_args, size_t max_args,
@@ -113,7 +114,7 @@ namespace riscv {
 			static const char *fmt = "core-%-4zu:%s (%s) %-30s\n";
 
 			addr_t addr;
-			if (!parse_integral(args[1], addr)) {
+			if (!parse_addr(args[1], addr)) {
 				printf("%s: invalid address: %s\n",
 					args[0].c_str(), args[1].c_str());
 				return 0;
@@ -143,7 +144,7 @@ namespace riscv {
 		static size_t cmd_hex(cmd_state &st, args_t &args)
 		{
 			addr_t addr;
-			if (!parse_integral(args[1], addr)) {
+			if (!parse_addr(args[1], addr)) {
 				printf("%s: invalid address: %s\n",
 					args[0].c_str(), args[1].c_str());
 				return 0;
@@ -206,7 +207,7 @@ namespace riscv {
 		static size_t cmd_ascii(cmd_state &st, args_t &args)
 		{
 			addr_t addr;
-			if (!parse_integral(args[1], addr)) {
+			if (!parse_addr(args[1], addr)) {
 				printf("%s: invalid address: %s\n",
 					args[0].c_str(), args[1].c_str());
 				return 0;
@@ -232,7 +233,7 @@ namespace riscv {
 			if (args.size() == 2) {
 				if (args[1] == "off") {
 					addr = 0;
-				} else if (!parse_integral(args[1], addr)) {
+				} else if (!parse_addr(args[1], addr)) {
 					printf("%s: invalid address: %s\n",
 						args[0].c_str(), args[1].c_str());
 					return 0;
@@ -256,6 +257,19 @@ namespace riscv {
 		static size_t cmd_run(cmd_state &, args_t &args)
 		{
 			s64 inst_count = -1;
+			if (args.size() == 2) {
+				if (!parse_integral(args[1], inst_count)) {
+					printf("%s: invalid count: %s\n",
+						args[0].c_str(), args[1].c_str());
+					return 0;
+				}
+			}
+			return size_t(inst_count);
+		}
+
+		static size_t cmd_step(cmd_state &, args_t &args)
+		{
+			s64 inst_count = 1;
 			if (args.size() == 2) {
 				if (!parse_integral(args[1], inst_count)) {
 					printf("%s: invalid count: %s\n",
