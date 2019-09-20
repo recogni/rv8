@@ -64,6 +64,9 @@ set(libriscv_util_SOURCES
 set(libriscv_sim_SOURCES
 	src/app/rv-sim.cc)
 
+set(libriscv_sys_SOURCES
+	src/app/rv-sys.cc)
+
 set(rv_bin_SOURCES
 	src/app/rv-dump.cc
 	src/app/rv-histogram.cc
@@ -115,11 +118,11 @@ target_link_libraries(rv-bin riscv_asm riscv_elf riscv_util)
 add_executable(rv-meta src/app/rv-meta.cc)
 target_link_libraries(rv-meta riscv_model riscv_gen riscv_util)
 
-add_executable(rv-sys src/app/rv-sys.cc)
+add_executable(rv-sys src/app/rv-sys-main.cc)
 target_link_libraries(rv-sys ncurses riscv_asm riscv_elf riscv_util)
 
 include_directories("cpp-httplib")
-add_executable(rv-sim src/app/rv-sim.cc)
+add_executable(rv-sim src/app/rv-sim-main.cc)
 target_compile_definitions(rv-sim PUBLIC -DNORECOGNI)
 target_link_libraries(rv-sim ncurses riscv_asm riscv_elf riscv_util ${MMAP_LIBS})
 

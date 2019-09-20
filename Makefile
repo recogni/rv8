@@ -302,9 +302,9 @@ TEST_CC_SRC =   $(SRC_DIR)/app/test-cc.cc
 TEST_CC_ASM =   $(ASM_DIR)/test-cc.s
 
 RV_SIM_MAIN_SRCS = $(SRC_DIR)/app/rv-sim-main.cc
-RV_SIM_MAIN_OBJS =  $(call cxx_src_objs, $(RV_SIM_MAIN_SRCS))
+RV_SIM_MAIN_OBJS = $(call cxx_src_objs, $(RV_SIM_MAIN_SRCS))
 RV_SYS_MAIN_SRCS = $(SRC_DIR)/app/rv-sys-main.cc
-RV_SYS_MAIN_OBJS =  $(call cxx_src_objs, $(RV_SYS_MAIN_SRCS))
+RV_SYS_MAIN_OBJS = $(call cxx_src_objs, $(RV_SYS_MAIN_SRCS))
 
 # libriscv_asm
 RV_ASM_SRCS =   $(SRC_DIR)/asm/assembler.cc \
@@ -646,11 +646,17 @@ endif
 
 sim-lib: $(RV_SIM_LIB) $(RV_SYS_LIB) 
 
+# TODO(berendo|sabhiram) : -pagezero_size cannot be used in non `main`s
+TEMP = -Wl,-pagezero_size,0x1000
+LIB_LDFLAGS := $(filter-out $(TEMP), $(LDFLAGS))
+TEMP = -rpath $(DEST_DIR)/lib
+LIB_MMAP_FLAGS := $(filter-out $(TEMP), $(MMAP_FLAGS))
+
 $(RV_SIM_LIB): $(RV_SIM_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
-	$(call cmd, SIMLIB $@, $(CC) $(LDFLAGS) $(MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
+	$(call cmd, SIMLIB $@, $(CC) $(LIB_LDFLAGS) $(LIB_MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
 
 $(RV_SYS_LIB): $(RV_SYS_OBJS) $(RV_ASM_OBJS) $(RV_ELF_OBJS) $(RV_UTIL_OBJS) $(MMAP_OBJS)
-	$(call cmd, SYSLIB $@, $(CC) $(LDFLAGS) $(MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
+	$(call cmd, SYSLIB $@, $(CC) $(LIB_LDFLAGS) $(LIB_MMAP_FLAGS) -static -r -nostartfiles -o $@ $^)
 
 $(MMAP_MACOS_OBJS): CFLAGS += -fPIC
 
