@@ -111,6 +111,7 @@ add_library(riscv_elf ${libriscv_elf_SOURCES})
 add_library(riscv_model ${libriscv_model_SOURCES})
 add_library(riscv_util ${libriscv_util_SOURCES})
 add_library(riscv_sim ${libriscv_sim_SOURCES})
+add_library(riscv_sys ${libriscv_sys_SOURCES})
 
 add_executable(rv-bin ${rv_bin_SOURCES})
 target_link_libraries(rv-bin riscv_asm riscv_elf riscv_util)
@@ -120,6 +121,7 @@ target_link_libraries(rv-meta riscv_model riscv_gen riscv_util)
 
 add_executable(rv-sys src/app/rv-sys-main.cc)
 target_link_libraries(rv-sys ncurses riscv_asm riscv_elf riscv_util)
+target_compile_definitions(riscv_sys PUBLIC -DRECOGNI)
 
 include_directories("cpp-httplib")
 add_executable(rv-sim src/app/rv-sim-main.cc)
