@@ -519,6 +519,8 @@ struct rv_emulator
 		proc.device_config->ram_base = default_ram_base;
 		proc.device_config->ram_size = default_ram_size;
 
+		/* Override the reset vector */
+		proc.pc = rom_entry;
 	}
 
 	/* Kill the executable with the given priv processor template */
@@ -528,7 +530,6 @@ struct rv_emulator
 #if defined (ENABLE_GPERFTOOL)
 		ProfilerStart("test-emulate.out");
 #endif
-
 
 		/*
 		 * Run the CPU until it halts
@@ -551,7 +552,6 @@ struct rv_emulator
 	/* Load and start a specific processor implementation based on ELF type */
 	void load()
 	{
-		elf_file elf;
 		elf.load(boot_filename, elf_load_headers);
 
 		/* check for RDTSCP on X86 */
