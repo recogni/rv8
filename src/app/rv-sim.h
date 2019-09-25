@@ -46,10 +46,6 @@
 #include <sys/utsname.h>
 #include <sys/resource.h>
 
-#ifdef RECOGNI
-#include "rv8.h"
-#endif
-
 #include "host-endian.h"
 #include "types.h"
 #include "fmt.h"
@@ -82,6 +78,10 @@
 #include "processor-proxy.h"
 #include "debug-cli.h"
 #include "processor-runloop.h"
+
+#ifdef RECOGNI
+#include "rv8.h"
+#endif
 
 #ifdef NORECOGNI
 #undef RECOGNI

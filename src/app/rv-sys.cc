@@ -49,3 +49,11 @@ void emulation_pin_set(std::string pin_type, unsigned pin_instance,
     proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
+int emulation_mem_get(unsigned long long pa, char *val, size_t len) {
+    return proc.mmu.mem->load_bytes(pa, val, len);
+}
+
+int emulation_mem_set(unsigned long long pa, char *val, size_t len) {
+    return proc.mmu.mem->store_bytes(pa, val, len);
+}
+

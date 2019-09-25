@@ -91,6 +91,10 @@
 #include "debug-cli.h"
 #include "processor-runloop.h"
 
+#ifdef RECOGNI
+#include "rv8.h"
+#endif
+
 #if defined (ENABLE_GPERFTOOL)
 #include "gperftools/profiler.h"
 #endif

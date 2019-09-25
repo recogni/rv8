@@ -19,6 +19,12 @@ namespace riscv {
 		addr_t brk;
 		bool log;
 
+	      	int load_bytes(addr_t va, char *bytes, size_t len)
+	             {return memcpy(bytes, (void *) va, len) != NULL; }
+
+	      	int store_bytes(addr_t va, char *bytes, size_t len)
+         	    {return memcpy(bytes, (void *) va, len) != NULL; }
+
 		void print_memory_map() {}
 
 	proxy_memory() : segments(), text_segments(), ro_segments(), rw_segments(),

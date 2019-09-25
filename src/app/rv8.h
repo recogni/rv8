@@ -2,6 +2,7 @@
 #define RV8_H
 
 #include <string>
+#include "asm/types.h"
 
 int emulation_setup(int argc, const char* argv[], const char* envp[]);
 int emulation_run(size_t count);
@@ -18,5 +19,15 @@ int emulation_pin_get(std::string pin_type, unsigned pin_instance);
 void emulation_pin_set(std::string pin_type, unsigned pin_instance,
 		       int pullup, int val);
 
+/*
+ * Memory interface (instead of a bus)
+ * pa - physical address in riscv-8 space (32 or 64 bits)
+ * val - pointer to byte arrray to fill to/from
+ * len - length in bytes
+ */
+int emulation_mem_get(unsigned long long pa, char *val, size_t len);
+int emulation_mem_set(unsigned long long pa, char *val, size_t len);
+
+#endif
 
 #endif

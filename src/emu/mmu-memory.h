@@ -16,11 +16,17 @@ namespace riscv {
 		virtual buserror_t load_16(addr_t va, u16 &val) { return -1; }
 		virtual buserror_t load_32(addr_t va, u32 &val) { return -1; }
 		virtual buserror_t load_64(addr_t va, u64 &val) { return -1; }
+	        virtual buserror_t load_bytes(addr_t va, char *val,
+					      size_t len)
+	            { return -1; }
 
 		virtual buserror_t store_8 (addr_t va, u8  val) { return -1; }
 		virtual buserror_t store_16(addr_t va, u16 val) { return -1; }
 		virtual buserror_t store_32(addr_t va, u32 val) { return -1; }
 		virtual buserror_t store_64(addr_t va, u64 val) { return -1; }
+	        virtual buserror_t store_bytes(addr_t va, char *val,
+					       size_t len)
+	            { return -1; }
 
 		template <typename T>
 		constexpr buserror_t load(addr_t va, T &val)
@@ -42,6 +48,7 @@ namespace riscv {
 			else return -1;
 		}
 	};
+
 
 	template <typename UX>
 	struct memory_segment : memory_bus<UX>
@@ -75,11 +82,16 @@ namespace riscv {
 		virtual buserror_t load_16(addr_t va, u16 &val) { val = *static_cast<u16*>((void*)va); return 0; }
 		virtual buserror_t load_32(addr_t va, u32 &val) { val = *static_cast<u32*>((void*)va); return 0; }
 		virtual buserror_t load_64(addr_t va, u64 &val) { val = *static_cast<u64*>((void*)va); return 0; }
+		virtual buserror_t load_bytes(addr_t va, char *bytes, size_t len)
+		{return memcpy(bytes, (void *) va, len) != NULL; }
+
 
 		virtual buserror_t store_8 (addr_t va, u8  val) { *static_cast<u8*>((void*)va) = val; return 0; }
 		virtual buserror_t store_16(addr_t va, u16 val) { *static_cast<u16*>((void*)va) = val; return 0; }
 		virtual buserror_t store_32(addr_t va, u32 val) { *static_cast<u32*>((void*)va) = val; return 0; }
 		virtual buserror_t store_64(addr_t va, u64 val) { *static_cast<u64*>((void*)va) = val; return 0; }
+		virtual buserror_t store_bytes(addr_t va, char *bytes, size_t len) 
+		{return memcpy((void *) va, bytes, len) != NULL; }
 	};
 
 
@@ -195,6 +207,14 @@ namespace riscv {
 			return segment->load_64(uva, val);
 		}
 
+  	        virtual buserror_t load_bytes(addr_t va, char *bytes, size_t len)
+		{
+		    memory_segment<UX> *segment = nullptr;
+		    addr_t uva = mpa_to_uva(segment, va);
+		    if (unlikely(!segment)) return -1;
+		    return segment->load_bytes(uva, bytes, len);
+		}
+
 		virtual buserror_t store_8 (addr_t va, u8  val)
 		{
 			memory_segment<UX> *segment = nullptr;
@@ -227,8 +247,15 @@ namespace riscv {
 			return segment->store_64(uva, val);
 		}
 
+  	        virtual buserror_t store_bytes(addr_t va, char *bytes, size_t len)
+		{
+		    memory_segment<UX> *segment = nullptr;
+		    addr_t uva = mpa_to_uva(segment, va);
+		    if (unlikely(!segment)) return -1;
+		    return segment->store_bytes(uva, bytes, len);
+		}
 	};
+};
 
-}
 
 #endif
