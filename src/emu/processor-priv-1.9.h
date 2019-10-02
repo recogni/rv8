@@ -256,6 +256,7 @@ namespace riscv {
 		std::shared_ptr<htif_mmio_device<processor_privileged>> device_htif;
 		std::shared_ptr<config_mmio_device<processor_privileged>> device_config;
 		std::shared_ptr<string_mmio_device<processor_privileged>> device_string;
+		std::shared_ptr<external_mmio_device<processor_privileged>> device_external;
 
 		u64 intr_sleep_time, intr_powerdown_delay;
 		std::vector<struct pollfd> pollfds;
@@ -360,6 +361,8 @@ core {
 			device_config = std::make_shared<config_mmio_device<processor_privileged>>(*this, 0x4000f000);
 			device_string  = std::make_shared<string_mmio_device<processor_privileged>>(*this, 0x40010000, create_config_string());
 
+			device_external  = std::make_shared<external_mmio_device<processor_privileged>>(*this, 0x50000000);
+
 			if (P::log & proc_log_config) {
 				printf("%s\n", device_string->str.c_str());
 			}
@@ -377,6 +380,7 @@ core {
 			P::mmu.mem->add_segment(device_htif);
 			P::mmu.mem->add_segment(device_config);
 			P::mmu.mem->add_segment(device_string);
+			P::mmu.mem->add_segment(device_external);
 		}
 
 		void exit(int rc)

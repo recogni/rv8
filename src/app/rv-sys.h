@@ -86,6 +86,7 @@
 #include "device-gpio.h"
 #include "device-rand.h"
 #include "device-htif.h"
+#include "device-external.h"
 #include "processor-histogram.h"
 #include "processor-priv-1.9.h"
 #include "debug-cli.h"

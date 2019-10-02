@@ -51,6 +51,13 @@ void emulation_fini()
     emulator.fini_proxy(proc);
 }
 
+void emulation_set_reg_write_callback(std::function<int (unsigned long long,
+							 unsigned long long)> fn)
+{
+    (void) fn(0x400000, 1);
+}
+
+
 int emulation_pin_get(std::string pin_type, unsigned pin_instance) {
     return proc.pins.pin_get(pin_type, pin_instance);
 }
@@ -61,4 +68,11 @@ void emulation_pin_set(std::string pin_type, unsigned pin_instance,
     proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
+int emulation_mem_write(unsigned long long addr, unsigned long long *val, int size) {
+    return 1;
+}
+
+int emulation_mem_read(unsigned long long addr, unsigned long long *val, int size) {
+    return 1;
+}
 #endif  // RECOGNI

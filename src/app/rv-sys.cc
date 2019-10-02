@@ -43,17 +43,46 @@ int emulation_pin_get(std::string pin_type, unsigned pin_instance) {
     return proc.pins.pin_get(pin_type, pin_instance);
 }
 
+    
+void emulation_set_reg_write_callback(std::function<int (unsigned long long,
+							 unsigned)> fn)
+{
+    proc.device_external->reg_write_cb_fn = fn;
+}
+
+void emulation_set_reg_read_callback(std::function<int (unsigned long long,
+							unsigned &)> fn)
+{
+    proc.device_external->reg_read_cb_fn = fn;
+}
+
 void emulation_pin_set(std::string pin_type, unsigned pin_instance,
 		       int pullup, int val) {
     proc.pins.ext_pin_set(pin_type, pin_instance, val);
     proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
-int emulation_mem_get(unsigned long long pa, char *val, size_t len) {
-    return proc.mmu.mem->load_bytes(pa, val, len);
+nt emulation_mem_write(unsigned long long addr, unsigned long *val, int size) {
+    int rv = 0;
+    for (int i = 0; i < size; i+= 4) {
+	rv = proc.mmu.mem->store(addr, *val);
+	if (rv != 0) {
+	    break;
+	} 
+	val++;
+    }
+    return rv;
 }
 
-int emulation_mem_set(unsigned long long pa, char *val, size_t len) {
-    return proc.mmu.mem->store_bytes(pa, val, len);
+int emulation_mem_read(unsigned long long addr, unsigned long *val, int size) {
+    int rv = 0;
+    for (int i = 0; i < size; i+= 4) {
+	rv = proc.mmu.mem->store(addr, *val);
+	if (rv != 0) {
+	    break;
+	} 
+	val++;
+    }
+    return rv;
 }
 

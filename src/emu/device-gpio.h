@@ -1,5 +1,5 @@
 //
-//  device-ipi.h
+//  device-gpio.h
 //
 
 #ifndef rv_device_gpio_h
