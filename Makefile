@@ -76,7 +76,7 @@ CPPFLAGS =
 CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES) -DRECOGNI
 #CFLAGS =        $(DEBUG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS) $(INCLUDES)
 CCFLAGS =       -std=c11 -D_DEFAULT_SOURCE $(CFLAGS)
-CXXFLAGS =      -std=c++1y -fno-rtti $(CFLAGS)
+CXXFLAGS =      -std=c++17 -fno-rtti $(CFLAGS)
 LDLIBFLAGS =     -r -Wl,-s
 LDFLAGS =       -L $(DIST_DIR)/lib
 ASM_FLAGS =     -S -masm=intel
@@ -289,8 +289,8 @@ RV_ELF_LIB =    $(LIB_DIR)/libriscv_elf.a
 RV_OPANDS_HDR = $(SRC_DIR)/asm/operands.h
 RV_CONSTR_HDR = $(SRC_DIR)/asm/constraints.h
 RV_CODEC_HDR =  $(SRC_DIR)/asm/switch.h
-RV_JIT_HDR =    $(SRC_DIR)/asm/jit.h
-RV_JIT_SRC =    $(SRC_DIR)/asm/jit.cc
+#RV_JIT_HDR =    $(SRC_DIR)/asm/jit.h
+#RV_JIT_SRC =    $(SRC_DIR)/asm/jit.cc
 RV_META_HDR =   $(SRC_DIR)/asm/meta.h
 RV_META_SRC =   $(SRC_DIR)/asm/meta.cc
 RV_STR_HDR =    $(SRC_DIR)/asm/strings.h
@@ -300,6 +300,9 @@ RV_FPU_HDR =    $(SRC_DIR)/test/test-fpu-gen.h
 RV_FPU_GEN =    $(SRC_DIR)/test/test-fpu-gen.c
 TEST_CC_SRC =   $(SRC_DIR)/app/test-cc.cc
 TEST_CC_ASM =   $(ASM_DIR)/test-cc.s
+
+RV_GDB_HDR =    $(SRC_DIR)/gdb/gdbstub.h
+RV_GDB_SRC =    $(SRC_DIR)/gdb/gdbstub.c
 
 RV_SIM_MAIN_SRCS = $(SRC_DIR)/app/rv-sim-main.cc
 RV_SIM_MAIN_OBJS = $(call cxx_src_objs, $(RV_SIM_MAIN_SRCS))
@@ -330,9 +333,9 @@ RV_BIN_OBJS = $(call cxx_src_objs, $(RV_BIN_SRCS))
 RV_BIN_BIN =  $(BIN_DIR)/rv-bin
 
 # rv-jit
-RV_JIT_SRCS = $(SRC_DIR)/app/rv-jit.cc
-RV_JIT_OBJS = $(call cxx_src_objs, $(RV_JIT_SRCS))
-RV_JIT_BIN =  $(BIN_DIR)/rv-jit
+#RV_JIT_SRCS = $(SRC_DIR)/app/rv-jit.cc
+#RV_JIT_OBJS = $(call cxx_src_objs, $(RV_JIT_SRCS))
+#RV_JIT_BIN =  $(BIN_DIR)/rv-jit
 
 # rv-sim
 RV_SIM_SRCS = $(SRC_DIR)/app/rv-sim.cc
@@ -541,7 +544,6 @@ install:
 	install $(RV_BIN_BIN) $(DEST_DIR)/bin/rv-bin
 	install $(RV_SIM_BIN) $(DEST_DIR)/bin/rv-sim
 	install $(RV_SYS_BIN) $(DEST_DIR)/bin/rv-sys
-	install $(RV_JIT_BIN) $(DEST_DIR)/bin/rv-jit
 	install $(MMAP_LIB) $(DEST_DIR)/lib/
 	install $(RV_SIM_LIB) $(DEST_DIR)/lib/
 	install $(RV_SYS_LIB) $(DEST_DIR)/lib/
@@ -561,6 +563,7 @@ parse_meta =  $(shell T=$$(mktemp /tmp/test.XXXX); \
 
 meta: $(RV_OPANDS_HDR) $(RV_CODEC_HDR) $(RV_JIT_HDR) $(RV_JIT_SRC) \
 	$(RV_META_HDR) $(RV_META_SRC) $(RV_STR_HDR) $(RV_STR_SRC) \
+	$(RV_GDB_HDR) $(RV_GDB_SRC) \
 	$(RV_FPU_HDR) $(RV_FPU_GEN) $(RV_INTERP_HDR) $(RV_CONSTR_HDR) \
 	$(TEST_CC_SRC)
 
@@ -602,6 +605,13 @@ $(RV_CONSTR_HDR): $(RV_META_BIN) $(RV_META_DATA)
 
 $(TEST_CC_SRC): $(RV_META_BIN) $(RV_META_DATA)
 	$(call cmd, META $@, $(call parse_meta,-CC,$@))
+
+$(RV_GDB_HDR): $(RV_META_BIN) $(RV_META_DATA)
+	$(call cmd, META $@, $(call parse_meta,-J,$@))
+
+$(RV_GDB_SRC): $(RV_META_BIN) $(RV_META_DATA)
+	$(call cmd, META $@, $(call parse_meta,-K,$@))
+
 
 # lib targets
 
