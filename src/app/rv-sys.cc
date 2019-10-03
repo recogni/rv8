@@ -62,7 +62,7 @@ void emulation_pin_set(std::string pin_type, unsigned pin_instance,
     proc.pins.ext_pin_pullup(pin_type, pin_instance, pullup);
 }
 
-nt emulation_mem_write(unsigned long long addr, unsigned long *val, int size) {
+int emulation_mem_write(unsigned long long addr, unsigned long *val, int size) {
     int rv = 0;
     for (int i = 0; i < size; i+= 4) {
 	rv = proc.mmu.mem->store(addr, *val);
