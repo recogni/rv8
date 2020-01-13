@@ -3,6 +3,8 @@ OS :=           $(shell uname -s | sed 's/ /_/' | tr A-Z a-z)
 CPU :=          $(shell uname -m | sed 's/ /_/' | tr A-Z a-z)
 ARCH :=         $(OS)_$(CPU)
 
+TARGET_ARCH=32
+
 # directories
 SRC_DIR =       src
 BUILD_DIR =     build
@@ -301,9 +303,6 @@ RV_FPU_GEN =    $(SRC_DIR)/test/test-fpu-gen.c
 TEST_CC_SRC =   $(SRC_DIR)/app/test-cc.cc
 TEST_CC_ASM =   $(ASM_DIR)/test-cc.s
 
-RV_GDB_HDR =    $(SRC_DIR)/gdb/gdbstub.h
-RV_GDB_SRC =    $(SRC_DIR)/gdb/gdbstub.c
-
 RV_SIM_MAIN_SRCS = $(SRC_DIR)/app/rv-sim-main.cc
 RV_SIM_MAIN_OBJS = $(call cxx_src_objs, $(RV_SIM_MAIN_SRCS))
 RV_SYS_MAIN_SRCS = $(SRC_DIR)/app/rv-sys-main.cc
@@ -490,12 +489,12 @@ doc/pdf/riscv-types.pdf: doc/tex/riscv-types.tex ; @mkdir -p doc/pdf
 # rom
 
 ROM_MK = src/rom/rom.mk
-rom: ; $(MAKE) -f $(ROM_MK) all ARCH=rv32imafd TARGET=riscv32-unknown-elf
+rom: ; $(MAKE) -f $(ROM_MK) all ARCH=rv$(TARGET_ARCH)imafd TARGET=riscv$(TARGET_ARCH)-unknown-elf
 
 # sample-asm
 
 ASM_MK = src/sample/asm.mk
-sample-asm: ; $(MAKE) -f $(ASM_MK) all ARCH=rv32imafd TARGET=riscv32-unknown-elf
+sample-asm: ; $(MAKE) -f $(ASM_MK) all ARCH=rv$(TARGET_ARCH)imafd TARGET=riscv$(TARGET_ARCH)-unknown-elf
 
 # linux bootstrap
 
@@ -563,7 +562,6 @@ parse_meta =  $(shell T=$$(mktemp /tmp/test.XXXX); \
 
 meta: $(RV_OPANDS_HDR) $(RV_CODEC_HDR) $(RV_JIT_HDR) $(RV_JIT_SRC) \
 	$(RV_META_HDR) $(RV_META_SRC) $(RV_STR_HDR) $(RV_STR_SRC) \
-	$(RV_GDB_HDR) $(RV_GDB_SRC) \
 	$(RV_FPU_HDR) $(RV_FPU_GEN) $(RV_INTERP_HDR) $(RV_CONSTR_HDR) \
 	$(TEST_CC_SRC)
 
@@ -605,13 +603,6 @@ $(RV_CONSTR_HDR): $(RV_META_BIN) $(RV_META_DATA)
 
 $(TEST_CC_SRC): $(RV_META_BIN) $(RV_META_DATA)
 	$(call cmd, META $@, $(call parse_meta,-CC,$@))
-
-$(RV_GDB_HDR): $(RV_META_BIN) $(RV_META_DATA)
-	$(call cmd, META $@, $(call parse_meta,-J,$@))
-
-$(RV_GDB_SRC): $(RV_META_BIN) $(RV_META_DATA)
-	$(call cmd, META $@, $(call parse_meta,-K,$@))
-
 
 # lib targets
 
