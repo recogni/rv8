@@ -3,7 +3,7 @@ OS :=           $(shell uname -s | sed 's/ /_/' | tr A-Z a-z)
 CPU :=          $(shell uname -m | sed 's/ /_/' | tr A-Z a-z)
 ARCH :=         $(OS)_$(CPU)
 
-TARGET_ARCH=32
+TARGET_ARCH=64
 
 # directories
 SRC_DIR =       src
